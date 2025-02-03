@@ -35,7 +35,10 @@
 namespace sf
 {
 ////////////////////////////////////////////////////////////
-VideoMode::VideoMode(Vector2u modeSize, unsigned int modeBitsPerPixel) : size(modeSize), bitsPerPixel(modeBitsPerPixel)
+VideoMode::VideoMode(Vector2u modeSize, unsigned int modeBitsPerPixel, unsigned int modeframeRate) :
+size(modeSize),
+bitsPerPixel(modeBitsPerPixel),
+frameRate(modeframeRate)
 {
 }
 
@@ -74,7 +77,7 @@ bool VideoMode::isValid() const
 ////////////////////////////////////////////////////////////
 bool operator==(const VideoMode& left, const VideoMode& right)
 {
-    return (left.size == right.size) && (left.bitsPerPixel == right.bitsPerPixel);
+    return (left.size == right.size) && (left.bitsPerPixel == right.bitsPerPixel) && (left.frameRate == right.frameRate);
 }
 
 
@@ -92,6 +95,11 @@ bool operator<(const VideoMode& left, const VideoMode& right)
     {
         if (left.size.x == right.size.x)
         {
+            if (left.size.y == right.size.y)
+            {
+                return left.frameRate < right.frameRate;
+            }
+
             return left.size.y < right.size.y;
         }
 

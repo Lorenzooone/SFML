@@ -56,9 +56,10 @@ public:
     ///
     /// \param modeSize         Width and height in pixels
     /// \param modeBitsPerPixel Pixel depths in bits per pixel
+    /// \param modeframeRate    Frame rate in hertz. Used only in fullscreen mode
     ///
     ////////////////////////////////////////////////////////////
-    explicit VideoMode(Vector2u modeSize, unsigned int modeBitsPerPixel = 32);
+    explicit VideoMode(Vector2u modeSize, unsigned int modeBitsPerPixel = 32, unsigned int modeframeRate = 60);
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the current desktop video mode
@@ -77,7 +78,7 @@ public:
     /// modes that can be used in fullscreen mode.
     /// The returned array is sorted from best to worst, so that
     /// the first element will always give the best mode (higher
-    /// width, height and bits-per-pixel).
+    /// width, height, framerate and bits-per-pixel).
     ///
     /// \return Array containing all the supported fullscreen modes
     ///
@@ -101,6 +102,7 @@ public:
     ////////////////////////////////////////////////////////////
     Vector2u     size;           //!< Video mode width and height, in pixels
     unsigned int bitsPerPixel{}; //!< Video mode pixel depth, in bits per pixels
+    unsigned int frameRate{};    //!< Video mode framerate
 };
 
 ////////////////////////////////////////////////////////////
