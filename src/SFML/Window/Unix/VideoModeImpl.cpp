@@ -81,25 +81,32 @@ std::vector<VideoMode> VideoModeImpl::getFullscreenModes()
                     const auto depths = X11Ptr<int[]>(XListDepths(display.get(), screen, &nbDepths));
                     if (depths && (nbDepths > 0))
                     {
-                        // Combine depths and sizes to fill the array of supported modes
-                        for (std::size_t i = 0; i < static_cast<std::size_t>(nbDepths); ++i)
+                        for (int i = 0; i < nbSizes; ++i)
                         {
-                            for (int j = 0; j < nbSizes; ++j)
+                            // Rates are size-dependent
+                            int    nbRates = 0;
+                            short* rates   = XRRConfigRates(config.get(), i, &nbRates);
+                            for (int j = 0; j < nbRates; ++j)
                             {
-                                // Convert to VideoMode
-                                VideoMode mode({static_cast<unsigned int>(sizes[j].width),
-                                                static_cast<unsigned int>(sizes[j].height)},
-                                               static_cast<unsigned int>(depths[i]));
+                                // Combine depths, rates and sizes to fill the array of supported modes
+                                for (std::size_t k = 0; k < static_cast<std::size_t>(nbDepths); ++k)
+                                {
+                                    // Convert to VideoMode
+                                    VideoMode mode({static_cast<unsigned int>(sizes[i].width),
+                                                    static_cast<unsigned int>(sizes[i].height)},
+                                                   static_cast<unsigned int>(depths[k]),
+                                                   static_cast<unsigned int>(rates[j]));
 
-                                Rotation currentRotation = 0;
-                                XRRConfigRotations(config.get(), &currentRotation);
+                                    Rotation currentRotation = 0;
+                                    XRRConfigRotations(config.get(), &currentRotation);
 
-                                if (currentRotation == RR_Rotate_90 || currentRotation == RR_Rotate_270)
-                                    std::swap(mode.size.x, mode.size.y);
+                                    if (currentRotation == RR_Rotate_90 || currentRotation == RR_Rotate_270)
+                                        std::swap(mode.size.x, mode.size.y);
 
-                                // Add it only if it is not already in the array
-                                if (std::find(modes.begin(), modes.end(), mode) == modes.end())
-                                    modes.push_back(mode);
+                                    // Add it only if it is not already in the array
+                                    if (std::find(modes.begin(), modes.end(), mode) == modes.end())
+                                        modes.push_back(mode);
+                                }
                             }
                         }
                     }
@@ -158,7 +165,8 @@ VideoMode VideoModeImpl::getDesktopMode()
                 {
                     desktopMode = VideoMode({static_cast<unsigned int>(sizes[currentMode].width),
                                              static_cast<unsigned int>(sizes[currentMode].height)},
-                                            static_cast<unsigned int>(DefaultDepth(display.get(), screen)));
+                                            static_cast<unsigned int>(DefaultDepth(display.get(), screen)),
+                                            static_cast<unsigned int>(XRRConfigCurrentRate(config.get())));
 
                     Rotation modeRotation = 0;
                     XRRConfigRotations(config.get(), &modeRotation);
