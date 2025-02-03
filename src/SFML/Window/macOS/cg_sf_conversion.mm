@@ -71,7 +71,7 @@ VideoMode convertCGModeToSFMode(CGDisplayModeRef cgmode)
     // https://developer.apple.com/library/mac/documentation/GraphicsAnimation/Conceptual/HighResolutionOSX/APIs/APIs.html#//apple_ref/doc/uid/TP40012302-CH5-SW27
     auto size = Vector2u(Vector2(CGDisplayModeGetPixelWidth(cgmode), CGDisplayModeGetPixelHeight(cgmode)));
     scaleInXY(size, nil);
-    return VideoMode(size, modeBitsPerPixel(cgmode));
+    return VideoMode(size, modeBitsPerPixel(cgmode), CGDisplayModeGetRefreshRate(cgmode));
 }
 
 } // namespace sf::priv
