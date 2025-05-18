@@ -42,10 +42,11 @@ std::vector<VideoMode> VideoModeImpl::getFullscreenModes()
     priv::ActivityStates& states = priv::getActivity();
 
     const std::lock_guard lock(states.mutex);
-    const auto            desktop = VideoMode(Vector2u(states.fullScreenSize));
+    const auto      full_desktop = VideoMode(Vector2u(states.fullScreenSize));
+    const auto  non_full_desktop = getDesktopMode();
 
     // Return both portrait and landscape resolutions
-    return {desktop, VideoMode(Vector2u(desktop.size.y, desktop.size.x), desktop.bitsPerPixel)};
+    return {full_desktop, VideoMode(Vector2u(full_desktop.size.y, full_desktop.size.x), full_desktop.bitsPerPixel), non_full_desktop, VideoMode(Vector2u(non_full_desktop.size.y, non_full_desktop.size.x), non_full_desktop.bitsPerPixel)};
 }
 
 
