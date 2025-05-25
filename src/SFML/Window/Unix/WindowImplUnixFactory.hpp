@@ -27,57 +27,42 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/Cursor.hpp>
 #include <SFML/Window/WindowEnums.hpp>
+#include <SFML/Window/WindowImpl.hpp>
 
-#include <SFML/System/Vector2.hpp>
 
 namespace sf::priv
 {
 ////////////////////////////////////////////////////////////
-/// \brief Unix implementation of Cursor
+/// \brief Linux (X11 and Wayland) factory for WindowImpl
 ///
 ////////////////////////////////////////////////////////////
-class CursorImpl
+class WindowImplUnixFactory
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief Static factory method
+    /// \brief Construct the window implementation from an existing control
     ///
-    /// Refer to sf::Cursor::Cursor().
+    /// \param handle Platform-specific handle of the control
     ///
     ////////////////////////////////////////////////////////////
-    static std::unique_ptr<CursorImpl> create();
+    static std::unique_ptr<WindowImpl> create(WindowHandle handle);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Destructor
+    /// \brief Create the window implementation
     ///
-    /// Refer to sf::Cursor::~Cursor().
-    ///
-    ////////////////////////////////////////////////////////////
-    virtual ~CursorImpl() = default;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Create a cursor with the provided image
-    ///
-    /// Refer to sf::Cursor::loadFromPixels().
+    /// \param mode  Video mode to use
+    /// \param title Title of the window
+    /// \param style Window style
+    /// \param state Window state
+    /// \param settings Additional settings for the underlying OpenGL context
     ///
     ////////////////////////////////////////////////////////////
-    virtual bool loadFromPixels(const std::uint8_t* pixels, Vector2u size, Vector2u hotspot) = 0;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Create a native system cursor
-    ///
-    /// Refer to sf::Cursor::loadFromSystem().
-    ///
-    ////////////////////////////////////////////////////////////
-    virtual bool loadFromSystem(Cursor::Type type) = 0;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the cursor of the impl
-    ///
-    ////////////////////////////////////////////////////////////
-    [[nodiscard]] virtual const void* getCursor() const = 0;
+    static std::unique_ptr<WindowImpl> create(VideoMode              mode,
+                                              const String&          title,
+                                              std::uint32_t          style,
+                                              State                  state,
+                                              const ContextSettings& settings);
 };
 
 } // namespace sf::priv

@@ -28,9 +28,12 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Cursor.hpp>
-#include <SFML/Window/WindowEnums.hpp>
+#include <SFML/Window/Unix/CursorImpl.hpp>
+#include <SFML/Window/WindowEnums.hpp> // Prevent conflict with macro None from Xlib
 
 #include <SFML/System/Vector2.hpp>
+
+#include <X11/Xlib.h>
 
 namespace sf::priv
 {
@@ -38,16 +41,16 @@ namespace sf::priv
 /// \brief Unix implementation of Cursor
 ///
 ////////////////////////////////////////////////////////////
-class CursorImpl
+class CursorImplX11 : public CursorImpl
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief Static factory method
+    /// \brief Default constructor
     ///
     /// Refer to sf::Cursor::Cursor().
     ///
     ////////////////////////////////////////////////////////////
-    static std::unique_ptr<CursorImpl> create();
+    CursorImplX11();
 
     ////////////////////////////////////////////////////////////
     /// \brief Destructor
@@ -55,7 +58,19 @@ public:
     /// Refer to sf::Cursor::~Cursor().
     ///
     ////////////////////////////////////////////////////////////
-    virtual ~CursorImpl() = default;
+    ~CursorImplX11() override;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Deleted copy constructor
+    ///
+    ////////////////////////////////////////////////////////////
+    CursorImplX11(const CursorImplX11&) = delete;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Deleted copy assignment
+    ///
+    ////////////////////////////////////////////////////////////
+    CursorImplX11& operator=(const CursorImplX11&) = delete;
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a cursor with the provided image
@@ -63,7 +78,7 @@ public:
     /// Refer to sf::Cursor::loadFromPixels().
     ///
     ////////////////////////////////////////////////////////////
-    virtual bool loadFromPixels(const std::uint8_t* pixels, Vector2u size, Vector2u hotspot) = 0;
+    bool loadFromPixels(const std::uint8_t* pixels, Vector2u size, Vector2u hotspot) override;
 
     ////////////////////////////////////////////////////////////
     /// \brief Create a native system cursor
@@ -71,13 +86,50 @@ public:
     /// Refer to sf::Cursor::loadFromSystem().
     ///
     ////////////////////////////////////////////////////////////
-    virtual bool loadFromSystem(Cursor::Type type) = 0;
+    bool loadFromSystem(Cursor::Type type) override;
 
     ////////////////////////////////////////////////////////////
     /// \brief Get the cursor of the impl
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] virtual const void* getCursor() const = 0;
+    [[nodiscard]] const void* getCursor() const override;
+
+private:
+    friend class WindowImplX11;
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Checks if colored cursors are supported for this display.
+    ///
+    ////////////////////////////////////////////////////////////
+    bool isColorCursorSupported();
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create a cursor with the provided image (ARGB support)
+    ///
+    /// Refer to sf::Cursor::loadFromPixels().
+    ///
+    ////////////////////////////////////////////////////////////
+    bool loadFromPixelsARGB(const std::uint8_t* pixels, Vector2u size, Vector2u hotspot);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Create a cursor with the provided image (monochrome)
+    ///
+    /// Refer to sf::Cursor::loadFromPixels().
+    ///
+    ////////////////////////////////////////////////////////////
+    bool loadFromPixelsMonochrome(const std::uint8_t* pixels, Vector2u size, Vector2u hotspot);
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Release the cursor, if we have loaded one.
+    ///
+    ////////////////////////////////////////////////////////////
+    void release();
+
+    ////////////////////////////////////////////////////////////
+    // Member data
+    ////////////////////////////////////////////////////////////
+    std::shared_ptr<::Display> m_display;
+    ::Cursor                   m_cursor{None};
 };
 
 } // namespace sf::priv

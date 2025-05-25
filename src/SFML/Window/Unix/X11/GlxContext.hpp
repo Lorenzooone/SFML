@@ -28,6 +28,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/GlContext.hpp>
+#include <SFML/Window/Unix/GlUnixContext.hpp>
 #include <SFML/Window/WindowEnums.hpp> // Prevent conflict with macro None from Xlib
 
 #include <X11/Xlib.h>
@@ -42,7 +43,7 @@ namespace sf::priv
 /// \brief Linux (GLX) implementation of OpenGL contexts
 ///
 ////////////////////////////////////////////////////////////
-class GlxContext : public GlContext
+class GlxContext : public GlUnixContext
 {
 public:
     ////////////////////////////////////////////////////////////

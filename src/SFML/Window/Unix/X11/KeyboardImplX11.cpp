@@ -25,10 +25,10 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/Unix/Display.hpp>
-#include <SFML/Window/Unix/KeySymToKeyMapping.hpp>
-#include <SFML/Window/Unix/KeySymToUnicodeMapping.hpp>
-#include <SFML/Window/Unix/KeyboardImpl.hpp>
+#include <SFML/Window/Unix/X11/DisplayX11.hpp>
+#include <SFML/Window/Unix/X11/KeySymToKeyMapping.hpp>
+#include <SFML/Window/Unix/X11/KeySymToUnicodeMapping.hpp>
+#include <SFML/Window/Unix/X11/KeyboardImplX11.hpp>
 
 #include <SFML/System/EnumArray.hpp>
 #include <SFML/System/String.hpp>
@@ -466,7 +466,7 @@ void ensureMapping()
     keycodeToScancode.fill(sf::Keyboard::Scan::Unknown);
 
     // Phase 2: Get XKB names with key code
-    const auto display = sf::priv::openDisplay();
+    const auto display = sf::priv::openDisplayX11();
 
     std::array<char, XkbKeyNameLength + 1> name{};
     XkbDescPtr                             descriptor = XkbGetMap(display.get(), 0, XkbUseCoreKbd);
@@ -548,7 +548,7 @@ KeyCode keyToKeyCode(sf::Keyboard::Key key)
 
     if (keysym != NoSymbol)
     {
-        const auto    display = sf::priv::openDisplay();
+        const auto    display = sf::priv::openDisplayX11();
         const KeyCode keycode = XKeysymToKeycode(display.get(), keysym);
 
         if (keycode != nullKeyCode)
@@ -566,7 +566,7 @@ KeyCode keyToKeyCode(sf::Keyboard::Key key)
 ////////////////////////////////////////////////////////////
 KeySym scancodeToKeySym(sf::Keyboard::Scancode code)
 {
-    const auto display = sf::priv::openDisplay();
+    const auto display = sf::priv::openDisplayX11();
 
     KeySym        keysym  = NoSymbol;
     const KeyCode keycode = scancodeToKeyCode(code);
@@ -583,7 +583,7 @@ bool isKeyPressedImpl(KeyCode keycode)
 {
     if (keycode != nullKeyCode)
     {
-        const auto display = sf::priv::openDisplay();
+        const auto display = sf::priv::openDisplayX11();
 
         // Get the whole keyboard state
         std::array<char, 32> keys{};
@@ -602,7 +602,7 @@ namespace sf::priv
 {
 
 ////////////////////////////////////////////////////////////
-bool KeyboardImpl::isKeyPressed(Keyboard::Key key)
+bool KeyboardImplX11::isKeyPressed(Keyboard::Key key)
 {
     const KeyCode keycode = keyToKeyCode(key);
     return isKeyPressedImpl(keycode);
@@ -610,7 +610,7 @@ bool KeyboardImpl::isKeyPressed(Keyboard::Key key)
 
 
 ////////////////////////////////////////////////////////////
-bool KeyboardImpl::isKeyPressed(Keyboard::Scancode code)
+bool KeyboardImplX11::isKeyPressed(Keyboard::Scancode code)
 {
     const KeyCode keycode = scancodeToKeyCode(code);
     return isKeyPressedImpl(keycode);
@@ -618,7 +618,7 @@ bool KeyboardImpl::isKeyPressed(Keyboard::Scancode code)
 
 
 ////////////////////////////////////////////////////////////
-Keyboard::Scancode KeyboardImpl::delocalize(Keyboard::Key key)
+Keyboard::Scancode KeyboardImplX11::delocalize(Keyboard::Key key)
 {
     const KeyCode keycode = keyToKeyCode(key);
     return keyCodeToScancode(keycode);
@@ -626,7 +626,7 @@ Keyboard::Scancode KeyboardImpl::delocalize(Keyboard::Key key)
 
 
 ////////////////////////////////////////////////////////////
-Keyboard::Key KeyboardImpl::localize(Keyboard::Scancode code)
+Keyboard::Key KeyboardImplX11::localize(Keyboard::Scancode code)
 {
     const KeySym keysym = scancodeToKeySym(code);
     return keySymToKey(keysym);
@@ -634,7 +634,7 @@ Keyboard::Key KeyboardImpl::localize(Keyboard::Scancode code)
 
 
 ////////////////////////////////////////////////////////////
-String KeyboardImpl::getDescription(Keyboard::Scancode code)
+String KeyboardImplX11::getDescription(Keyboard::Scancode code)
 {
     bool checkInput = true;
 
@@ -789,7 +789,7 @@ String KeyboardImpl::getDescription(Keyboard::Scancode code)
 
 
 ////////////////////////////////////////////////////////////
-Keyboard::Key KeyboardImpl::getKeyFromEvent(XKeyEvent& event)
+Keyboard::Key KeyboardImplX11::getKeyFromEvent(XKeyEvent& event)
 {
     // Try each KeySym index (modifier group) until we get a match
     for (int i = 0; i < 4; ++i)
@@ -806,7 +806,7 @@ Keyboard::Key KeyboardImpl::getKeyFromEvent(XKeyEvent& event)
 
 
 ////////////////////////////////////////////////////////////
-Keyboard::Scancode KeyboardImpl::getScancodeFromEvent(XKeyEvent& event)
+Keyboard::Scancode KeyboardImplX11::getScancodeFromEvent(XKeyEvent& event)
 {
     return keyCodeToScancode(static_cast<KeyCode>(event.keycode));
 }

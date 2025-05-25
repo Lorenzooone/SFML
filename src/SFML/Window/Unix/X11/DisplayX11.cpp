@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/Unix/Display.hpp>
+#include <SFML/Window/Unix/X11/DisplayX11.hpp>
 
 #include <SFML/System/Err.hpp>
 
@@ -43,26 +43,26 @@
 namespace
 {
 // A nested named namespace is used here to allow unity builds of SFML.
-namespace UnixDisplayImpl
+namespace UnixDisplayX11Impl
 {
 std::weak_ptr<Display> weakSharedDisplay;
 std::recursive_mutex   mutex;
-} // namespace UnixDisplayImpl
+} // namespace UnixDisplayX11Impl
 } // namespace
 
 
 namespace sf::priv
 {
 ////////////////////////////////////////////////////////////
-std::shared_ptr<Display> openDisplay()
+std::shared_ptr<Display> openDisplayX11()
 {
-    const std::lock_guard lock(UnixDisplayImpl::mutex);
+    const std::lock_guard lock(UnixDisplayX11Impl::mutex);
 
-    auto sharedDisplay = UnixDisplayImpl::weakSharedDisplay.lock();
+    auto sharedDisplay = UnixDisplayX11Impl::weakSharedDisplay.lock();
     if (!sharedDisplay)
     {
         sharedDisplay.reset(XOpenDisplay(nullptr), XCloseDisplay);
-        UnixDisplayImpl::weakSharedDisplay = sharedDisplay;
+        UnixDisplayX11Impl::weakSharedDisplay = sharedDisplay;
 
         // Opening display failed: The best we can do at the moment is to output a meaningful error message
         // and cause an abnormal program termination
@@ -80,10 +80,10 @@ std::shared_ptr<Display> openDisplay()
 ////////////////////////////////////////////////////////////
 std::shared_ptr<_XIM> openXim()
 {
-    const std::lock_guard lock(UnixDisplayImpl::mutex);
+    const std::lock_guard lock(UnixDisplayX11Impl::mutex);
 
-    assert(!UnixDisplayImpl::weakSharedDisplay.expired() &&
-           "Display is not initialized. Call priv::openDisplay() to initialize it.");
+    assert(!UnixDisplayX11Impl::weakSharedDisplay.expired() &&
+           "Display is not initialized. Call priv::openDisplayX11() to initialize it.");
 
     static std::weak_ptr<_XIM> xim;
 
@@ -109,7 +109,7 @@ std::shared_ptr<_XIM> openXim()
             if (im)
                 XCloseIM(im);
         };
-        sharedXIM.reset(XOpenIM(UnixDisplayImpl::weakSharedDisplay.lock().get(), nullptr, nullptr, nullptr), closeIM);
+        sharedXIM.reset(XOpenIM(UnixDisplayX11Impl::weakSharedDisplay.lock().get(), nullptr, nullptr, nullptr), closeIM);
         xim = sharedXIM;
 
         // Restore the previous locale
@@ -132,7 +132,7 @@ Atom getAtom(const std::string& name, bool onlyIfExists)
     if (const auto it = atoms.find(name); it != atoms.end())
         return it->second;
 
-    const auto display = openDisplay();
+    const auto display = openDisplayX11();
     const Atom atom    = XInternAtom(display.get(), name.c_str(), onlyIfExists ? True : False);
     if (atom)
         atoms[name] = atom;

@@ -25,25 +25,45 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/Unix/ClipboardImpl.hpp>
-#include <SFML/Window/Unix/X11/ClipboardImplX11.hpp>
+
+#include <SFML/Window/Unix/GlUnixContext.hpp>
+#include <SFML/Window/Unix/X11/GlxContext.hpp>
 
 namespace sf::priv
 {
 
 ////////////////////////////////////////////////////////////
-String ClipboardImpl::getString()
+std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext* shared)
 {
     // Add support for another backend here
-    return ClipboardImplX11::getString();
+    return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared));
 }
 
 
 ////////////////////////////////////////////////////////////
-void ClipboardImpl::setString(const String& text)
+std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext*         shared,
+                                                     const ContextSettings& settings,
+                                                     const WindowImpl&      owner,
+                                                     unsigned int           bitsPerPixel)
 {
     // Add support for another backend here
-    ClipboardImplX11::setString(text);
+    return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared), settings, owner, bitsPerPixel);
+}
+
+
+////////////////////////////////////////////////////////////
+std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext* shared, const ContextSettings& settings, Vector2u size)
+{
+    // Add support for another backend here
+    return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared), settings, size);
+}
+
+
+////////////////////////////////////////////////////////////
+GlFunctionPointer GlUnixContext::getFunction(const char* name)
+{
+    // Add support for another backend here
+    return GlxContext::getFunction(name);
 }
 
 } // namespace sf::priv

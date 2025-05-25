@@ -40,7 +40,7 @@
 #include <SFML/System/Android/Activity.hpp>
 #endif
 #if defined(SFML_SYSTEM_LINUX) && !defined(SFML_USE_DRM)
-#include <SFML/Window/Unix/Utils.hpp>
+#include <SFML/Window/Unix/X11/Utils.hpp>
 
 #include <X11/Xlib.h>
 #endif

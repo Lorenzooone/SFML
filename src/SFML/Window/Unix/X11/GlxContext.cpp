@@ -26,10 +26,10 @@
 // Headers
 ////////////////////////////////////////////////////////////
 
-#include <SFML/Window/Unix/Display.hpp>
-#include <SFML/Window/Unix/GlxContext.hpp>
-#include <SFML/Window/Unix/Utils.hpp>
-#include <SFML/Window/Unix/WindowImplX11.hpp>
+#include <SFML/Window/Unix/X11/DisplayX11.hpp>
+#include <SFML/Window/Unix/X11/GlxContext.hpp>
+#include <SFML/Window/Unix/X11/Utils.hpp>
+#include <SFML/Window/Unix/X11/WindowImplX11.hpp>
 
 #include <SFML/System/Err.hpp>
 
@@ -119,7 +119,7 @@ GlxContext::GlxContext(GlxContext* shared, const ContextSettings& settings, cons
     m_settings = settings;
 
     // Open the connection with the X server
-    m_display = openDisplay();
+    m_display = openDisplayX11();
 
     // Make sure that extensions are initialized
     ensureExtensionsInit(m_display.get(), DefaultScreen(m_display.get()));
@@ -139,7 +139,7 @@ GlxContext::GlxContext(GlxContext* shared, const ContextSettings& settings, Vect
     m_settings = settings;
 
     // Open the connection with the X server
-    m_display = openDisplay();
+    m_display = openDisplayX11();
 
     // Make sure that extensions are initialized
     ensureExtensionsInit(m_display.get(), DefaultScreen(m_display.get()));

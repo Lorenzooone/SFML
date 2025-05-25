@@ -112,21 +112,31 @@ elseif(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_OPENBSD OR SFML_OS_NETBSD)
             ${SRCROOT}/Unix/ClipboardImpl.hpp
             ${SRCROOT}/Unix/ClipboardImpl.cpp
             ${SRCROOT}/Unix/InputImpl.cpp
-            ${SRCROOT}/Unix/KeyboardImpl.hpp
-            ${SRCROOT}/Unix/KeyboardImpl.cpp
-            ${SRCROOT}/Unix/KeySymToKeyMapping.hpp
-            ${SRCROOT}/Unix/KeySymToKeyMapping.cpp
-            ${SRCROOT}/Unix/KeySymToUnicodeMapping.hpp
-            ${SRCROOT}/Unix/KeySymToUnicodeMapping.cpp
             ${SRCROOT}/Unix/SensorImpl.cpp
             ${SRCROOT}/Unix/SensorImpl.hpp
-            ${SRCROOT}/Unix/Display.cpp
-            ${SRCROOT}/Unix/Display.hpp
-            ${SRCROOT}/Unix/Utils.hpp
             ${SRCROOT}/Unix/VideoModeImpl.cpp
-            ${SRCROOT}/Unix/VulkanImplX11.cpp
-            ${SRCROOT}/Unix/WindowImplX11.cpp
-            ${SRCROOT}/Unix/WindowImplX11.hpp
+            ${SRCROOT}/Unix/WindowImplUnixFactory.cpp
+            ${SRCROOT}/Unix/WindowImplUnixFactory.hpp
+            ${SRCROOT}/Unix/X11/DisplayX11.cpp
+            ${SRCROOT}/Unix/X11/DisplayX11.hpp
+            ${SRCROOT}/Unix/X11/VideoModeImplX11.cpp
+            ${SRCROOT}/Unix/X11/VideoModeImplX11.hpp
+            ${SRCROOT}/Unix/X11/ClipboardImplX11.cpp
+            ${SRCROOT}/Unix/X11/ClipboardImplX11.hpp
+            ${SRCROOT}/Unix/X11/CursorImplX11.cpp
+            ${SRCROOT}/Unix/X11/CursorImplX11.hpp
+            ${SRCROOT}/Unix/X11/InputImplX11.cpp
+            ${SRCROOT}/Unix/X11/InputImplX11.hpp
+            ${SRCROOT}/Unix/X11/KeyboardImplX11.hpp
+            ${SRCROOT}/Unix/X11/KeyboardImplX11.cpp
+            ${SRCROOT}/Unix/X11/KeySymToKeyMapping.hpp
+            ${SRCROOT}/Unix/X11/KeySymToKeyMapping.cpp
+            ${SRCROOT}/Unix/X11/KeySymToUnicodeMapping.hpp
+            ${SRCROOT}/Unix/X11/KeySymToUnicodeMapping.cpp
+            ${SRCROOT}/Unix/X11/Utils.hpp
+            ${SRCROOT}/Unix/X11/VulkanImplX11.cpp
+            ${SRCROOT}/Unix/X11/WindowImplX11.cpp
+            ${SRCROOT}/Unix/X11/WindowImplX11.hpp
         )
         if(SFML_OPENGL_ES)
             list(APPEND PLATFORM_SRC
@@ -137,8 +147,10 @@ elseif(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_OPENBSD OR SFML_OS_NETBSD)
             )
         else()
              list(APPEND PLATFORM_SRC
-                ${SRCROOT}/Unix/GlxContext.cpp
-                ${SRCROOT}/Unix/GlxContext.hpp
+                ${SRCROOT}/Unix/GlUnixContext.cpp
+                ${SRCROOT}/Unix/GlUnixContext.hpp
+                ${SRCROOT}/Unix/X11/GlxContext.cpp
+                ${SRCROOT}/Unix/X11/GlxContext.hpp
             )
         endif()
     endif()

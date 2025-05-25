@@ -80,8 +80,9 @@ using ContextType = sf::priv::EglContext;
 
 #else
 
-#include <SFML/Window/Unix/GlxContext.hpp>
-using ContextType = sf::priv::GlxContext;
+#include <SFML/Window/Unix/GlUnixContext.hpp>
+using ContextType = sf::priv::GlUnixContext;
+#define GLCONTEXT_USE_FACTORY
 
 #endif
 
@@ -205,7 +206,12 @@ struct GlContext::SharedContext
     {
         const std::lock_guard lock(mutex);
 
-        context.emplace(nullptr);
+        // Create the shared context
+#ifdef GLCONTEXT_USE_FACTORY
+        context = ContextType::create(nullptr);
+#else
+        context = std::make_unique<ContextType>(nullptr);
+#endif
         context->initialize(ContextSettings{});
 
         loadExtensions();
@@ -312,7 +318,7 @@ struct GlContext::SharedContext
     std::vector<std::string> extensions;
 
     // The hidden, inactive context that will be shared with all other contexts
-    std::optional<ContextType> context;
+    std::unique_ptr<ContextType> context;
 };
 
 
@@ -562,7 +568,11 @@ std::unique_ptr<GlContext> GlContext::create()
     sharedContext->context->setActive(true);
 
     // Create the context
-    context = std::make_unique<ContextType>(&sharedContext->context.value());
+#ifdef GLCONTEXT_USE_FACTORY
+    context = ContextType::create(sharedContext->context.get());
+#else
+    context = std::make_unique<ContextType>(sharedContext->context.get());
+#endif
 
     sharedContext->context->setActive(false);
 
@@ -595,7 +605,11 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, co
                                              settings.minorVersion,
                                              settings.attributeFlags};
 
-        sharedContext->context.emplace(nullptr, sharedSettings, Vector2u(1, 1));
+#ifdef GLCONTEXT_USE_FACTORY
+        sharedContext->context = ContextType::create(nullptr, sharedSettings, Vector2u(1, 1));
+#else
+        sharedContext->context = std::make_unique<ContextType>(nullptr, sharedSettings, Vector2u(1, 1));
+#endif
         sharedContext->context->initialize(sharedSettings);
 
         // Reload our extensions vector
@@ -610,7 +624,11 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, co
     sharedContext->context->setActive(true);
 
     // Create the context
-    context = std::make_unique<ContextType>(&sharedContext->context.value(), settings, owner, bitsPerPixel);
+#ifdef GLCONTEXT_USE_FACTORY
+    context = ContextType::create(sharedContext->context.get(), settings, owner, bitsPerPixel);
+#else
+    context = std::make_unique<ContextType>(sharedContext->context.get(), settings, owner, bitsPerPixel);
+#endif
 
     sharedContext->context->setActive(false);
 
@@ -644,7 +662,11 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, Ve
                                              settings.minorVersion,
                                              settings.attributeFlags};
 
-        sharedContext->context.emplace(nullptr, sharedSettings, Vector2u(1, 1));
+#ifdef GLCONTEXT_USE_FACTORY
+        sharedContext->context = ContextType::create(nullptr, sharedSettings, Vector2u(1, 1));
+#else
+        sharedContext->context = std::make_unique<ContextType>(nullptr, sharedSettings, Vector2u(1, 1));
+#endif
         sharedContext->context->initialize(sharedSettings);
 
         // Reload our extensions vector
@@ -657,7 +679,11 @@ std::unique_ptr<GlContext> GlContext::create(const ContextSettings& settings, Ve
     sharedContext->context->setActive(true);
 
     // Create the context
-    auto context = std::make_unique<ContextType>(&sharedContext->context.value(), settings, size);
+#ifdef GLCONTEXT_USE_FACTORY
+    auto context = ContextType::create(sharedContext->context.get(), settings, size);
+#else
+    auto context = std::make_unique<ContextType>(sharedContext->context.get(), settings, size);
+#endif
 
     sharedContext->context->setActive(false);
 

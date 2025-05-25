@@ -27,57 +27,59 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/Cursor.hpp>
+#include <SFML/Window/GlContext.hpp>
 #include <SFML/Window/WindowEnums.hpp>
-
-#include <SFML/System/Vector2.hpp>
 
 namespace sf::priv
 {
 ////////////////////////////////////////////////////////////
-/// \brief Unix implementation of Cursor
+/// \brief Shared Linux implementation of OpenGL contexts
 ///
 ////////////////////////////////////////////////////////////
-class CursorImpl
+class GlUnixContext : public GlContext
 {
 public:
     ////////////////////////////////////////////////////////////
-    /// \brief Static factory method
+    /// \brief Create a new default context
     ///
-    /// Refer to sf::Cursor::Cursor().
+    /// \param shared Context to share the new one with (can be a null pointer)
     ///
     ////////////////////////////////////////////////////////////
-    static std::unique_ptr<CursorImpl> create();
+    static std::unique_ptr<GlUnixContext> create(GlUnixContext* shared);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Destructor
+    /// \brief Create a new context attached to a window
     ///
-    /// Refer to sf::Cursor::~Cursor().
+    /// \param shared       Context to share the new one with
+    /// \param settings     Creation parameters
+    /// \param owner        Pointer to the owner window
+    /// \param bitsPerPixel Pixel depth, in bits per pixel
     ///
     ////////////////////////////////////////////////////////////
-    virtual ~CursorImpl() = default;
+    static std::unique_ptr<GlUnixContext> create(GlUnixContext*         shared,
+                                                 const ContextSettings& settings,
+                                                 const WindowImpl&      owner,
+                                                 unsigned int           bitsPerPixel);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Create a cursor with the provided image
+    /// \brief Create a new context that embeds its own rendering target
     ///
-    /// Refer to sf::Cursor::loadFromPixels().
+    /// \param shared   Context to share the new one with
+    /// \param settings Creation parameters
+    /// \param size     Back buffer width and height, in pixels
     ///
     ////////////////////////////////////////////////////////////
-    virtual bool loadFromPixels(const std::uint8_t* pixels, Vector2u size, Vector2u hotspot) = 0;
+    static std::unique_ptr<GlUnixContext> create(GlUnixContext* shared, const ContextSettings& settings, Vector2u size);
 
     ////////////////////////////////////////////////////////////
-    /// \brief Create a native system cursor
+    /// \brief Get the address of an OpenGL function
     ///
-    /// Refer to sf::Cursor::loadFromSystem().
+    /// \param name Name of the function to get the address of
     ///
-    ////////////////////////////////////////////////////////////
-    virtual bool loadFromSystem(Cursor::Type type) = 0;
-
-    ////////////////////////////////////////////////////////////
-    /// \brief Get the cursor of the impl
+    /// \return Address of the OpenGL function, `nullptr` on failure
     ///
     ////////////////////////////////////////////////////////////
-    [[nodiscard]] virtual const void* getCursor() const = 0;
+    static GlFunctionPointer getFunction(const char* name);
 };
 
 } // namespace sf::priv

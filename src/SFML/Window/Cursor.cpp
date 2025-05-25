@@ -39,7 +39,11 @@ namespace sf
 {
 
 ////////////////////////////////////////////////////////////
+#ifdef CURSOR_USE_FACTORY
+Cursor::Cursor() : m_impl(priv::CursorImpl::create())
+#else
 Cursor::Cursor() : m_impl(std::make_unique<priv::CursorImpl>())
+#endif
 {
 }
 

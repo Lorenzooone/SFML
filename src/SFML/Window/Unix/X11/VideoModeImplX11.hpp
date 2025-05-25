@@ -27,22 +27,35 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Config.hpp>
+#include <SFML/Window/VideoModeImpl.hpp>
 
-#if defined(SFML_SYSTEM_WINDOWS)
-#include <SFML/Window/Win32/CursorImpl.hpp>
-#elif defined(SFML_SYSTEM_LINUX) || defined(SFML_SYSTEM_FREEBSD) || defined(SFML_SYSTEM_OPENBSD) || \
-    defined(SFML_SYSTEM_NETBSD)
-#if defined(SFML_USE_DRM)
-#include <SFML/Window/DRM/CursorImpl.hpp>
-#else
-#include <SFML/Window/Unix/CursorImpl.hpp>
-#define CURSOR_USE_FACTORY
-#endif
-#elif defined(SFML_SYSTEM_MACOS)
-#include <SFML/Window/macOS/CursorImpl.hpp>
-#elif defined(SFML_SYSTEM_IOS)
-#include <SFML/Window/iOS/CursorImpl.hpp>
-#elif defined(SFML_SYSTEM_ANDROID)
-#include <SFML/Window/Android/CursorImpl.hpp>
-#endif
+#include <vector>
+
+
+namespace sf::priv
+{
+////////////////////////////////////////////////////////////
+/// \brief OS-specific implementation of video modes functions
+///
+////////////////////////////////////////////////////////////
+class VideoModeImplX11 : VideoModeImpl
+{
+public:
+    ////////////////////////////////////////////////////////////
+    /// \brief Get the list of all the supported fullscreen video modes
+    ///
+    /// \return Array filled with the fullscreen video modes
+    ///
+    ////////////////////////////////////////////////////////////
+    static std::vector<VideoMode> getFullscreenModes();
+
+    ////////////////////////////////////////////////////////////
+    /// \brief Get the current desktop video mode
+    ///
+    /// \return Current desktop video mode
+    ///
+    ////////////////////////////////////////////////////////////
+    static VideoMode getDesktopMode();
+};
+
+} // namespace sf::priv

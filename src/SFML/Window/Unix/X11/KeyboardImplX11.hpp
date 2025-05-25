@@ -33,12 +33,12 @@
 
 
 ////////////////////////////////////////////////////////////
-/// \brief sf::priv::KeyboardImpl helper
+/// \brief sf::priv::KeyboardImplX11 helper
 ///
 /// This class implements keyboard handling functions
 /// to help sf::priv::InputImpl class.
 ////////////////////////////////////////////////////////////
-namespace sf::priv::KeyboardImpl
+namespace sf::priv::KeyboardImplX11
 {
 ////////////////////////////////////////////////////////////
 /// \copydoc sf::Keyboard::isKeyPressed(Key)
@@ -90,4 +90,4 @@ Keyboard::Key getKeyFromEvent(XKeyEvent& event);
 ////////////////////////////////////////////////////////////
 Keyboard::Scancode getScancodeFromEvent(XKeyEvent& event);
 
-} // namespace sf::priv::KeyboardImpl
+} // namespace sf::priv::KeyboardImplX11

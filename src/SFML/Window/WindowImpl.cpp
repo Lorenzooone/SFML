@@ -61,10 +61,12 @@ using WindowImplType = sf::priv::WindowImplDRM;
 
 #else
 
-#include <SFML/Window/Unix/WindowImplX11.hpp>
-using WindowImplType = sf::priv::WindowImplX11;
+#include <SFML/Window/Unix/WindowImplUnixFactory.hpp>
+using WindowImplType = sf::priv::WindowImplUnixFactory;
 
 #include <SFML/Window/VulkanImpl.hpp>
+
+#define WINDOW_USE_FACTORY
 
 #endif
 
@@ -151,7 +153,11 @@ std::unique_ptr<WindowImpl> WindowImpl::create(
         style |= Style::Titlebar;
 #endif
 
+#ifdef WINDOW_USE_FACTORY
+    auto windowImpl = WindowImplType::create(mode, title, style, state, settings);
+#else
     auto windowImpl = std::make_unique<WindowImplType>(mode, title, style, state, settings);
+#endif
     if (state == State::Fullscreen)
         WindowImplImpl::fullscreenWindow = windowImpl.get();
     return windowImpl;
@@ -161,7 +167,11 @@ std::unique_ptr<WindowImpl> WindowImpl::create(
 ////////////////////////////////////////////////////////////
 std::unique_ptr<WindowImpl> WindowImpl::create(WindowHandle handle)
 {
+#ifdef WINDOW_USE_FACTORY
+    return WindowImplType::create(handle);
+#else
     return std::make_unique<WindowImplType>(handle);
+#endif
 }
 
 

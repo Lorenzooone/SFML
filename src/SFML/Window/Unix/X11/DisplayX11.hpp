@@ -43,7 +43,7 @@ namespace sf::priv
 /// \return Pointer to the shared display
 ///
 ////////////////////////////////////////////////////////////
-std::shared_ptr<Display> openDisplay();
+std::shared_ptr<Display> openDisplayX11();
 
 ////////////////////////////////////////////////////////////
 /// \brief Get the shared XIM context for the Display

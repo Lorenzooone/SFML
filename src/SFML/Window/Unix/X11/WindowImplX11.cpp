@@ -26,12 +26,11 @@
 // Headers
 ////////////////////////////////////////////////////////////
 
-#include <SFML/Window/InputImpl.hpp>
-#include <SFML/Window/Unix/ClipboardImpl.hpp>
-#include <SFML/Window/Unix/Display.hpp>
-#include <SFML/Window/Unix/KeyboardImpl.hpp>
-#include <SFML/Window/Unix/Utils.hpp>
-#include <SFML/Window/Unix/WindowImplX11.hpp>
+#include <SFML/Window/Unix/X11/ClipboardImplX11.hpp>
+#include <SFML/Window/Unix/X11/DisplayX11.hpp>
+#include <SFML/Window/Unix/X11/KeyboardImplX11.hpp>
+#include <SFML/Window/Unix/X11/Utils.hpp>
+#include <SFML/Window/Unix/X11/WindowImplX11.hpp>
 
 #include <SFML/System/Err.hpp>
 #include <SFML/System/Sleep.hpp>
@@ -70,7 +69,7 @@
 #include <SFML/Window/EglContext.hpp>
 using ContextType = sf::priv::EglContext;
 #else
-#include <SFML/Window/Unix/GlxContext.hpp>
+#include <SFML/Window/Unix/X11/GlxContext.hpp>
 using ContextType = sf::priv::GlxContext;
 #endif
 
@@ -167,7 +166,7 @@ bool ewmhSupported()
     if (!netSupportingWmCheck || !netSupported)
         return false;
 
-    const auto display = sf::priv::openDisplay();
+    const auto display = sf::priv::openDisplayX11();
 
     Atom           actualType   = 0;
     int            actualFormat = 0;
@@ -454,7 +453,7 @@ WindowImplX11::WindowImplX11(WindowHandle handle) : m_isExternal(true)
     using namespace WindowImplX11Impl;
 
     // Open a connection with the X server
-    m_display = openDisplay();
+    m_display = openDisplayX11();
 
     // Make sure to check for EWMH support before we do anything
     ewmhSupported();
@@ -489,7 +488,7 @@ m_cursorGrabbed(m_fullscreen)
     using namespace WindowImplX11Impl;
 
     // Open a connection with the X server
-    m_display = openDisplay();
+    m_display = openDisplayX11();
 
     // Make sure to check for EWMH support before we do anything
     ewmhSupported();
@@ -792,7 +791,7 @@ void WindowImplX11::processEvents()
     }
 
     // Process clipboard window events
-    ClipboardImpl::processEvents();
+    ClipboardImplX11::processEvents();
 }
 
 
@@ -1112,7 +1111,7 @@ void WindowImplX11::setMouseCursorVisible(bool visible)
 ////////////////////////////////////////////////////////////
 void WindowImplX11::setMouseCursor(const CursorImpl& cursor)
 {
-    m_lastCursor = cursor.m_cursor;
+    m_lastCursor = *static_cast<const ::Cursor*>(cursor.getCursor());
     XDefineCursor(m_display.get(), m_window, m_lastCursor);
     XFlush(m_display.get());
 }
@@ -1803,8 +1802,8 @@ bool WindowImplX11::processEvent(XEvent& windowEvent)
             // Fill the event parameters
             // TODO: if modifiers are wrong, use XGetModifierMapping to retrieve the actual modifiers mapping
             Event::KeyPressed event;
-            event.code     = KeyboardImpl::getKeyFromEvent(windowEvent.xkey);
-            event.scancode = KeyboardImpl::getScancodeFromEvent(windowEvent.xkey);
+            event.code     = KeyboardImplX11::getKeyFromEvent(windowEvent.xkey);
+            event.scancode = KeyboardImplX11::getScancodeFromEvent(windowEvent.xkey);
             event.alt      = windowEvent.xkey.state & Mod1Mask;
             event.control  = windowEvent.xkey.state & ControlMask;
             event.shift    = windowEvent.xkey.state & ShiftMask;
@@ -1884,8 +1883,8 @@ bool WindowImplX11::processEvent(XEvent& windowEvent)
         {
             // Fill the event parameters
             Event::KeyReleased event;
-            event.code     = KeyboardImpl::getKeyFromEvent(windowEvent.xkey);
-            event.scancode = KeyboardImpl::getScancodeFromEvent(windowEvent.xkey);
+            event.code     = KeyboardImplX11::getKeyFromEvent(windowEvent.xkey);
+            event.scancode = KeyboardImplX11::getScancodeFromEvent(windowEvent.xkey);
             event.alt      = windowEvent.xkey.state & Mod1Mask;
             event.control  = windowEvent.xkey.state & ControlMask;
             event.shift    = windowEvent.xkey.state & ShiftMask;

@@ -25,7 +25,7 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
-#include <SFML/Window/Unix/Display.hpp>
+#include <SFML/Window/Unix/X11/DisplayX11.hpp>
 #include <SFML/Window/VulkanImpl.hpp>
 
 #include <dlfcn.h>
@@ -201,7 +201,7 @@ bool VulkanImpl::createVulkanSurface(const VkInstance&            instance,
 
     // Since the surface is basically attached to the window, the connection
     // to the X display will stay open even after we open and close it here
-    const auto                 display           = openDisplay();
+    const auto                 display           = openDisplayX11();
     VkXlibSurfaceCreateInfoKHR surfaceCreateInfo = VkXlibSurfaceCreateInfoKHR();
     surfaceCreateInfo.sType                      = VK_STRUCTURE_TYPE_XLIB_SURFACE_CREATE_INFO_KHR;
     surfaceCreateInfo.dpy                        = display.get();
