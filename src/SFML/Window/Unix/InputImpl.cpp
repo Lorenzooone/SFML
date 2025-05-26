@@ -26,6 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/InputImpl.hpp>
+#include <SFML/Window/Unix/UnixBackendChooser.hpp>
 #include <SFML/Window/Unix/X11/InputImplX11.hpp>
 
 #include <SFML/System/String.hpp>
@@ -35,7 +36,8 @@ namespace sf::priv::InputImpl
 ////////////////////////////////////////////////////////////
 bool isKeyPressed(Keyboard::Key key)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::isKeyPressed(key);
     return sf::priv::InputImplX11::isKeyPressed(key);
 }
 
@@ -43,7 +45,8 @@ bool isKeyPressed(Keyboard::Key key)
 ////////////////////////////////////////////////////////////
 bool isKeyPressed(Keyboard::Scancode code)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::isKeyPressed(code);
     return sf::priv::InputImplX11::isKeyPressed(code);
 }
 
@@ -51,7 +54,8 @@ bool isKeyPressed(Keyboard::Scancode code)
 ////////////////////////////////////////////////////////////
 Keyboard::Key localize(Keyboard::Scancode code)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::localize(code);
     return sf::priv::InputImplX11::localize(code);
 }
 
@@ -59,7 +63,8 @@ Keyboard::Key localize(Keyboard::Scancode code)
 ////////////////////////////////////////////////////////////
 Keyboard::Scancode delocalize(Keyboard::Key key)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::delocalize(key);
     return sf::priv::InputImplX11::delocalize(key);
 }
 
@@ -67,22 +72,29 @@ Keyboard::Scancode delocalize(Keyboard::Key key)
 ////////////////////////////////////////////////////////////
 String getDescription(Keyboard::Scancode code)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::getDescription(code);
     return sf::priv::InputImplX11::getDescription(code);
 }
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wduplicated-branches"
 ////////////////////////////////////////////////////////////
 void setVirtualKeyboardVisible(bool visible)
 {
-    // Add support for another backend here
-    sf::priv::InputImplX11::setVirtualKeyboardVisible(visible);
+    if (isUnixBackendX11())
+        sf::priv::InputImplX11::setVirtualKeyboardVisible(visible);
+    else
+        sf::priv::InputImplX11::setVirtualKeyboardVisible(visible);
 }
+#pragma GCC diagnostic pop
 
 
 ////////////////////////////////////////////////////////////
 bool isMouseButtonPressed(Mouse::Button button)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::isMouseButtonPressed(button);
     return sf::priv::InputImplX11::isMouseButtonPressed(button);
 }
 
@@ -90,7 +102,8 @@ bool isMouseButtonPressed(Mouse::Button button)
 ////////////////////////////////////////////////////////////
 Vector2i getMousePosition()
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::getMousePosition();
     return sf::priv::InputImplX11::getMousePosition();
 }
 
@@ -98,7 +111,8 @@ Vector2i getMousePosition()
 ////////////////////////////////////////////////////////////
 Vector2i getMousePosition(const WindowBase& relativeTo)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::getMousePosition(relativeTo);
     return sf::priv::InputImplX11::getMousePosition(relativeTo);
 }
 
@@ -106,23 +120,28 @@ Vector2i getMousePosition(const WindowBase& relativeTo)
 ////////////////////////////////////////////////////////////
 void setMousePosition(Vector2i position)
 {
-    // Add support for another backend here
-    sf::priv::InputImplX11::setMousePosition(position);
+    if (isUnixBackendX11())
+        sf::priv::InputImplX11::setMousePosition(position);
+    else
+        sf::priv::InputImplX11::setMousePosition(position);
 }
 
 
 ////////////////////////////////////////////////////////////
 void setMousePosition(Vector2i position, const WindowBase& relativeTo)
 {
-    // Add support for another backend here
-    sf::priv::InputImplX11::setMousePosition(position, relativeTo);
+    if (isUnixBackendX11())
+        sf::priv::InputImplX11::setMousePosition(position, relativeTo);
+    else
+        sf::priv::InputImplX11::setMousePosition(position, relativeTo);
 }
 
 
 ////////////////////////////////////////////////////////////
 bool isTouchDown(unsigned int finger)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::isTouchDown(finger);
     return sf::priv::InputImplX11::isTouchDown(finger);
 }
 
@@ -130,7 +149,8 @@ bool isTouchDown(unsigned int finger)
 ////////////////////////////////////////////////////////////
 Vector2i getTouchPosition(unsigned int finger)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::getTouchPosition(finger);
     return sf::priv::InputImplX11::getTouchPosition(finger);
 }
 
@@ -138,7 +158,8 @@ Vector2i getTouchPosition(unsigned int finger)
 ////////////////////////////////////////////////////////////
 Vector2i getTouchPosition(unsigned int finger, const WindowBase& relativeTo)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return sf::priv::InputImplX11::getTouchPosition(finger, relativeTo);
     return sf::priv::InputImplX11::getTouchPosition(finger, relativeTo);
 }
 

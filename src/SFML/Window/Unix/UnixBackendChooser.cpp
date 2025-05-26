@@ -26,32 +26,42 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Unix/UnixBackendChooser.hpp>
-#include <SFML/Window/Unix/X11/VideoModeImplX11.hpp>
-#include <SFML/Window/VideoModeImpl.hpp>
 
-#include <SFML/System/Err.hpp>
+#include <cstdlib>
 
-#include <algorithm>
-#include <ostream>
+namespace
+{
 
+enum UnixBackendType
+{
+    UNIX_BACKEND_NONE,
+    UNIX_BACKEND_X11,
+    UNIX_BACKEND_WAYLAND
+};
+
+UnixBackendType chosenBackend = UNIX_BACKEND_NONE;
+
+// Important: have it so this is not run at the start of the program.
+// So the programmer can prevent Wayland, if they so choose.
+void chooseUnixBackend()
+{
+    const char* waylandLoaded = std::getenv("WAYLAND_DISPLAY");
+    if (waylandLoaded && *waylandLoaded)
+        chosenBackend = UNIX_BACKEND_WAYLAND;
+    else
+        chosenBackend = UNIX_BACKEND_X11;
+}
+
+} // namespace
 
 namespace sf::priv
 {
-////////////////////////////////////////////////////////////
-std::vector<VideoMode> VideoModeImpl::getFullscreenModes()
-{
-    if (isUnixBackendX11())
-        return VideoModeImplX11::getFullscreenModes();
-    return VideoModeImplX11::getFullscreenModes();
-}
 
-
-////////////////////////////////////////////////////////////
-VideoMode VideoModeImpl::getDesktopMode()
+bool isUnixBackendX11()
 {
-    if (isUnixBackendX11())
-        return VideoModeImplX11::getDesktopMode();
-    return VideoModeImplX11::getDesktopMode();
+    if (chosenBackend == UNIX_BACKEND_NONE)
+        chooseUnixBackend();
+    return chosenBackend == UNIX_BACKEND_X11;
 }
 
 } // namespace sf::priv

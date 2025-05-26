@@ -26,6 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Unix/CursorImpl.hpp>
+#include <SFML/Window/Unix/UnixBackendChooser.hpp>
 #include <SFML/Window/Unix/X11/CursorImplX11.hpp>
 
 namespace sf::priv
@@ -34,7 +35,8 @@ namespace sf::priv
 ////////////////////////////////////////////////////////////
 std::unique_ptr<CursorImpl> CursorImpl::create()
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return std::make_unique<CursorImplX11>();
     return std::make_unique<CursorImplX11>();
 }
 

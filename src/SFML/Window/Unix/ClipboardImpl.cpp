@@ -26,6 +26,7 @@
 // Headers
 ////////////////////////////////////////////////////////////
 #include <SFML/Window/Unix/ClipboardImpl.hpp>
+#include <SFML/Window/Unix/UnixBackendChooser.hpp>
 #include <SFML/Window/Unix/X11/ClipboardImplX11.hpp>
 
 namespace sf::priv
@@ -34,16 +35,22 @@ namespace sf::priv
 ////////////////////////////////////////////////////////////
 String ClipboardImpl::getString()
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return ClipboardImplX11::getString();
     return ClipboardImplX11::getString();
 }
 
 
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wduplicated-branches"
 ////////////////////////////////////////////////////////////
 void ClipboardImpl::setString(const String& text)
 {
-    // Add support for another backend here
-    ClipboardImplX11::setString(text);
+    if (isUnixBackendX11())
+        ClipboardImplX11::setString(text);
+    else
+        ClipboardImplX11::setString(text);
 }
+#pragma GCC diagnostic pop
 
 } // namespace sf::priv

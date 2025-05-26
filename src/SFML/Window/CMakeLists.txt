@@ -117,6 +117,8 @@ elseif(SFML_OS_LINUX OR SFML_OS_FREEBSD OR SFML_OS_OPENBSD OR SFML_OS_NETBSD)
             ${SRCROOT}/Unix/VideoModeImpl.cpp
             ${SRCROOT}/Unix/WindowImplUnixFactory.cpp
             ${SRCROOT}/Unix/WindowImplUnixFactory.hpp
+            ${SRCROOT}/Unix/UnixBackendChooser.cpp
+            ${SRCROOT}/Unix/UnixBackendChooser.hpp
             ${SRCROOT}/Unix/X11/DisplayX11.cpp
             ${SRCROOT}/Unix/X11/DisplayX11.hpp
             ${SRCROOT}/Unix/X11/VideoModeImplX11.cpp

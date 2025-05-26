@@ -27,6 +27,7 @@
 ////////////////////////////////////////////////////////////
 
 #include <SFML/Window/Unix/GlUnixContext.hpp>
+#include <SFML/Window/Unix/UnixBackendChooser.hpp>
 #include <SFML/Window/Unix/X11/GlxContext.hpp>
 
 namespace sf::priv
@@ -35,7 +36,8 @@ namespace sf::priv
 ////////////////////////////////////////////////////////////
 std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext* shared)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared));
     return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared));
 }
 
@@ -46,7 +48,8 @@ std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext*         shar
                                                      const WindowImpl&      owner,
                                                      unsigned int           bitsPerPixel)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared), settings, owner, bitsPerPixel);
     return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared), settings, owner, bitsPerPixel);
 }
 
@@ -54,7 +57,8 @@ std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext*         shar
 ////////////////////////////////////////////////////////////
 std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext* shared, const ContextSettings& settings, Vector2u size)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared), settings, size);
     return std::make_unique<GlxContext>(static_cast<GlxContext*>(shared), settings, size);
 }
 
@@ -62,7 +66,8 @@ std::unique_ptr<GlUnixContext> GlUnixContext::create(GlUnixContext* shared, cons
 ////////////////////////////////////////////////////////////
 GlFunctionPointer GlUnixContext::getFunction(const char* name)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return GlxContext::getFunction(name);
     return GlxContext::getFunction(name);
 }
 

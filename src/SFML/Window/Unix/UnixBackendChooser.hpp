@@ -22,36 +22,13 @@
 //
 ////////////////////////////////////////////////////////////
 
-////////////////////////////////////////////////////////////
-// Headers
-////////////////////////////////////////////////////////////
-#include <SFML/Window/Unix/UnixBackendChooser.hpp>
-#include <SFML/Window/Unix/X11/VideoModeImplX11.hpp>
-#include <SFML/Window/VideoModeImpl.hpp>
-
-#include <SFML/System/Err.hpp>
-
-#include <algorithm>
-#include <ostream>
-
+#pragma once
 
 namespace sf::priv
 {
 ////////////////////////////////////////////////////////////
-std::vector<VideoMode> VideoModeImpl::getFullscreenModes()
-{
-    if (isUnixBackendX11())
-        return VideoModeImplX11::getFullscreenModes();
-    return VideoModeImplX11::getFullscreenModes();
-}
-
-
+/// \brief Utility method to get the current backend
+///
 ////////////////////////////////////////////////////////////
-VideoMode VideoModeImpl::getDesktopMode()
-{
-    if (isUnixBackendX11())
-        return VideoModeImplX11::getDesktopMode();
-    return VideoModeImplX11::getDesktopMode();
-}
-
+bool isUnixBackendX11();
 } // namespace sf::priv

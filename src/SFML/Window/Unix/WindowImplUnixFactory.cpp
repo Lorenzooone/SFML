@@ -25,6 +25,8 @@
 ////////////////////////////////////////////////////////////
 // Headers
 ////////////////////////////////////////////////////////////
+
+#include <SFML/Window/Unix/UnixBackendChooser.hpp>
 #include <SFML/Window/Unix/WindowImplUnixFactory.hpp>
 #include <SFML/Window/Unix/X11/WindowImplX11.hpp>
 
@@ -37,7 +39,8 @@ namespace sf::priv
 ////////////////////////////////////////////////////////////
 std::unique_ptr<WindowImpl> WindowImplUnixFactory::create(WindowHandle handle)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return std::make_unique<WindowImplX11>(handle);
     return std::make_unique<WindowImplX11>(handle);
 }
 
@@ -50,7 +53,8 @@ std::unique_ptr<WindowImpl> WindowImplUnixFactory::create(
     State                  state,
     const ContextSettings& settings)
 {
-    // Add support for another backend here
+    if (isUnixBackendX11())
+        return std::make_unique<WindowImplX11>(mode, title, style, state, settings);
     return std::make_unique<WindowImplX11>(mode, title, style, state, settings);
 }
 
