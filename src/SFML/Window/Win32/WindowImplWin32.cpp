@@ -38,6 +38,7 @@
 // or mingw-w64 addresses files in a case insensitive manner.
 #include <array>
 #include <dbt.h>
+#include <dwmapi.h>
 #include <ostream>
 #include <vector>
 
@@ -57,6 +58,11 @@
 #ifndef MAPVK_VK_TO_VSC
 #define MAPVK_VK_TO_VSC (0)
 #endif
+
+// Older dwmapi.h versions lack these definitions
+#define DWMWA_WINDOW_CORNER_PREFERENCE_SFML 33
+#define DWMWCP_DEFAULT_SFML                 0
+#define DWMWCP_DONOTROUND_SFML              1
 
 namespace
 {
@@ -237,6 +243,18 @@ WindowImplWin32::WindowImplWin32(VideoMode     mode,
             JoystickImpl::setLazyUpdates(true);
 
             initRawMouse();
+        }
+
+        if (!m_fullscreen)
+        {
+            unsigned int cornerAttribute = DWMWCP_DEFAULT_SFML;
+            if (style & Style::SquareCorners)
+                cornerAttribute = DWMWCP_DONOTROUND_SFML;
+
+            DwmSetWindowAttribute(m_handle,
+                                  DWMWA_WINDOW_CORNER_PREFERENCE_SFML,
+                                  static_cast<LPCVOID>(&cornerAttribute),
+                                  sizeof(cornerAttribute));
         }
 
         ++handleCount;
