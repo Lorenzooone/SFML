@@ -196,8 +196,14 @@ bool Window::setActive(bool active) const
 void Window::display()
 {
     // Display the backbuffer on screen
-    if (setActive())
+    if (setActive()) {
+    	
+        std::chrono::time_point<std::chrono::high_resolution_clock> last_draw_time = std::chrono::high_resolution_clock::now();
         m_context->display();
+        auto curr_time = std::chrono::high_resolution_clock::now();
+        std::chrono::duration<double> diff = curr_time - last_draw_time;
+        printf("IN SFML DISPLAY: %f\n", diff.count());
+    }
 
     // Limit the framerate if needed
     if (m_frameTimeLimit != Time::Zero)
