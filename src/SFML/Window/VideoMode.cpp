@@ -65,6 +65,10 @@ const std::vector<VideoMode>& VideoMode::getFullscreenModes()
 ////////////////////////////////////////////////////////////
 bool VideoMode::isValid() const
 {
+    #ifdef SFML_SYSTEM_ANDROID
+        if ((*this) == getDesktopMode())
+            return true;
+    #endif
     const std::vector<VideoMode>& modes = getFullscreenModes();
 
     return std::find(modes.begin(), modes.end(), *this) != modes.end();

@@ -345,6 +345,8 @@ void onNativeWindowCreated(ANativeActivity* activity, ANativeWindow* window)
     // to recreate the surface again
     if (states.context)
     {
+        // Update getDesktopMode accordingly...
+        getScreenSizeInPixels(*activity, states.screenSize.x, states.screenSize.y);
         states.forwardEvent(sf::Event::FocusGained{});
     }
 
@@ -437,6 +439,8 @@ void onContentRectChanged(ANativeActivity* activity, const ARect* /* rect */)
     // Make sure the window still exists before we access the dimensions on it
     if (states.window != nullptr)
     {
+        // Update getDesktopMode accordingly...
+        getScreenSizeInPixels(*activity, states.screenSize.x, states.screenSize.y);
         // Send an event to warn people about the window move/resize
         const sf::Event::Resized event{
             sf::Vector2u(sf::Vector2(ANativeWindow_getWidth(states.window), ANativeWindow_getHeight(states.window)))};
