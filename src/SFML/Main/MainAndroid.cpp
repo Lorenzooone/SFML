@@ -123,32 +123,99 @@ sf::priv::ActivityStates& retrieveStates(ANativeActivity& activity)
 ////////////////////////////////////////////////////////////
 void goToFullscreenModeAPI30(ANativeActivity& activity)
 {
+    err() << "TEST" << std::endl;
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     JNIEnv& lJNIEnv = *activity.env;
 
     jclass classInsetsType = lJNIEnv.FindClass("android/view/WindowInsets$Type");
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     jmethodID methodSystemBars = lJNIEnv.GetStaticMethodID(classInsetsType, "systemBars", "()I");
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     int systemBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodSystemBars);
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     jobject objectActivity = activity.clazz;
     jclass  classActivity  = lJNIEnv.GetObjectClass(objectActivity);
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     jmethodID methodGetWindow = lJNIEnv.GetMethodID(classActivity, "getWindow", "()Landroid/view/Window;");
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
     jobject   objectWindow    = lJNIEnv.CallObjectMethod(objectActivity, methodGetWindow);
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     jclass    classWindow        = lJNIEnv.FindClass("android/view/Window");
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
     jmethodID methodGetInsetsController = lJNIEnv.GetMethodID(classWindow, "getInsetsController", "()Landroid/view/WindowInsetsController;");
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
     jobject   objectController    = lJNIEnv.CallObjectMethod(objectWindow, methodGetInsetsController);
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     jclass classInsetsController = lJNIEnv.FindClass("android/view/WindowInsetsController");
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     jmethodID methodHide = lJNIEnv.GetMethodID(classInsetsController, "hide", "(I)V");
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
 
     lJNIEnv.CallVoidMethod(objectController, methodHide, systemBars);
+    if (lJNIEnv.ExceptionCheck())
+	{
+		lJNIEnv.ExceptionDescribe();
+		lJNIEnv.ExceptionClear();
+	}
+    err() << "SystemBars " << std::to_string(systemBars) << std::endl;
 }
 
 ////////////////////////////////////////////////////////////
