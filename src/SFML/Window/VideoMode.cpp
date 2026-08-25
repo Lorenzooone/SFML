@@ -54,7 +54,14 @@ const std::vector<VideoMode>& VideoMode::getFullscreenModes()
     static const auto modes = []
     {
         std::vector<VideoMode> result = priv::VideoModeImpl::getFullscreenModes();
+        // Do NOT sort on Android. The first one is the correct one for the current
+        // screen orientation... While after the first boot this can be tracked using
+        // the Resized event, for the first boot that is not possible!
+        // Technically the ideal thing on Android would be to always just return one,
+        // that changes depending on the orientation of the screen...
+        #ifndef SFML_SYSTEM_ANDROID
         std::sort(result.begin(), result.end(), std::greater<>());
+        #endif
         return result;
     }();
 
@@ -65,10 +72,6 @@ const std::vector<VideoMode>& VideoMode::getFullscreenModes()
 ////////////////////////////////////////////////////////////
 bool VideoMode::isValid() const
 {
-    #ifdef SFML_SYSTEM_ANDROID
-        if ((*this) == getDesktopMode())
-            return true;
-    #endif
     const std::vector<VideoMode>& modes = getFullscreenModes();
 
     return std::find(modes.begin(), modes.end(), *this) != modes.end();

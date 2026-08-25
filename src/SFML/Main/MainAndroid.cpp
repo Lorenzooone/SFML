@@ -123,7 +123,7 @@ sf::priv::ActivityStates& retrieveStates(ANativeActivity& activity)
 
 
 void ActualConsoleOutText(std::string out_string) {
-	__android_log_print(ANDROID_LOG_INFO, "cc3dsfs", "%s", out_string.c_str());
+    __android_log_print(ANDROID_LOG_INFO, "cc3dsfs", "%s", out_string.c_str());
 }
 
 ////////////////////////////////////////////////////////////
@@ -160,25 +160,25 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 
     lJNIEnv.CallVoidMethod(objectController, methodHide, systemBars);
 
-	jmethodID methodGetAttributes = lJNIEnv.GetMethodID(classWindow, "getAttributes", "()Landroid/view/WindowManager$LayoutParams;");
+    jmethodID methodGetAttributes = lJNIEnv.GetMethodID(classWindow, "getAttributes", "()Landroid/view/WindowManager$LayoutParams;");
 
-	jobject attrs = lJNIEnv.CallObjectMethod(objectWindow, methodGetAttributes);
+    jobject attrs = lJNIEnv.CallObjectMethod(objectWindow, methodGetAttributes);
 
-	if (attrs) {
-		jclass paramsClass = lJNIEnv.GetObjectClass(attrs);
+    if (attrs) {
+        jclass paramsClass = lJNIEnv.GetObjectClass(attrs);
 
         jfieldID   fieldSystemUiFlagLowProfile = lJNIEnv.GetStaticFieldID(paramsClass, "LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS", "I");
         const int systemUiFlagLowProfile      = lJNIEnv.GetStaticIntField(paramsClass, fieldSystemUiFlagLowProfile);
 
-		jfieldID cutoutModeField = lJNIEnv.GetFieldID(paramsClass, "layoutInDisplayCutoutMode", "I");
+        jfieldID cutoutModeField = lJNIEnv.GetFieldID(paramsClass, "layoutInDisplayCutoutMode", "I");
 
-		lJNIEnv.SetIntField(attrs, cutoutModeField, systemUiFlagLowProfile);
+        lJNIEnv.SetIntField(attrs, cutoutModeField, systemUiFlagLowProfile);
 
-		jmethodID setAttributes = lJNIEnv.GetMethodID(classWindow, "setAttributes", "(Landroid/view/WindowManager$LayoutParams;)V");
+        jmethodID setAttributes = lJNIEnv.GetMethodID(classWindow, "setAttributes", "(Landroid/view/WindowManager$LayoutParams;)V");
 
-		lJNIEnv.CallVoidMethod(objectWindow, setAttributes,	attrs);
-		ActualConsoleOutText("systemUiFlagLowProfile " + std::to_string(systemUiFlagLowProfile));
-	}
+        lJNIEnv.CallVoidMethod(objectWindow, setAttributes,    attrs);
+        ActualConsoleOutText("systemUiFlagLowProfile " + std::to_string(systemUiFlagLowProfile));
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -246,10 +246,10 @@ void goToFullscreenMode(ANativeActivity& activity)
 
 void getScreenSizeInPixelsAPI30(ANativeActivity& activity, int& width, int& height, bool ignore_insets)
 {
-	// From Android developers documentation, perform the following Java code:
-	//
-	//final WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
-	//final Rect bounds = metrics.getBounds();
+    // From Android developers documentation, perform the following Java code:
+    //
+    //final WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
+    //final Rect bounds = metrics.getBounds();
 
     JNIEnv& lJNIEnv = *activity.env;
 
@@ -268,13 +268,13 @@ void getScreenSizeInPixelsAPI30(ANativeActivity& activity, int& width, int& heig
 
     jclass    classWindowMetrics      = lJNIEnv.FindClass("android/view/WindowMetrics");
 
-	jmethodID methodGetBounds = lJNIEnv.GetMethodID(classWindowMetrics, "getBounds", "()Landroid/graphics/Rect;");
+    jmethodID methodGetBounds = lJNIEnv.GetMethodID(classWindowMetrics, "getBounds", "()Landroid/graphics/Rect;");
 
     jobject objectRect = lJNIEnv.CallObjectMethod(objectWindowMetrics, methodGetBounds);
 
     jclass    classRect                 = lJNIEnv.FindClass("android/graphics/Rect");
-	jmethodID methodWidth = lJNIEnv.GetMethodID(classRect, "width", "()I");
-	jmethodID methodHeight = lJNIEnv.GetMethodID(classRect, "height", "()I");
+    jmethodID methodWidth = lJNIEnv.GetMethodID(classRect, "width", "()I");
+    jmethodID methodHeight = lJNIEnv.GetMethodID(classRect, "height", "()I");
 
     width = lJNIEnv.CallIntMethod(objectRect, methodWidth);
     height = lJNIEnv.CallIntMethod(objectRect, methodHeight);
@@ -282,18 +282,18 @@ void getScreenSizeInPixelsAPI30(ANativeActivity& activity, int& width, int& heig
     if (ignore_insets)
         return;
 
-	// From Android developers documentation, perform the following Java code:
-	//
-	//final WindowInsets windowInsets = metrics.getWindowInsets();
-	//Insets insets = windowInsets.getInsets(WindowInsets.Type.navigationBars() | WindowInsets.Type.displayCutout()); // Edited
-	//
-	//int insetsWidth = insets.right + insets.left;
-	//int insetsHeight = insets.top + insets.bottom;
-	//
+    // From Android developers documentation, perform the following Java code:
+    //
+    //final WindowInsets windowInsets = metrics.getWindowInsets();
+    //Insets insets = windowInsets.getInsets(WindowInsets.Type.navigationBars() | WindowInsets.Type.statusBars() | WindowInsets.Type.displayCutout()); // Edited
+    //
+    //int insetsWidth = insets.right + insets.left;
+    //int insetsHeight = insets.top + insets.bottom;
+    //
     //final Size legacySize = new Size(bounds.width() - insetsWidth, bounds.height() - insetsHeight);
 
-	jmethodID methodGetWindowInsets = lJNIEnv.GetMethodID(classWindowMetrics, "getWindowInsets", "()Landroid/view/WindowInsets;");
-	jobject objectWindowInsets = lJNIEnv.CallObjectMethod(objectWindowMetrics, methodGetWindowInsets);
+    jmethodID methodGetWindowInsets = lJNIEnv.GetMethodID(classWindowMetrics, "getWindowInsets", "()Landroid/view/WindowInsets;");
+    jobject objectWindowInsets = lJNIEnv.CallObjectMethod(objectWindowMetrics, methodGetWindowInsets);
 
     jclass classInsetsType = lJNIEnv.FindClass("android/view/WindowInsets$Type");
 
@@ -306,8 +306,8 @@ void getScreenSizeInPixelsAPI30(ANativeActivity& activity, int& width, int& heig
     int displayCutout = lJNIEnv.CallStaticIntMethod(classInsetsType, methodDisplayCutout);
 
     jclass classWindowInsets = lJNIEnv.FindClass("android/view/WindowInsets");
-	jmethodID methodIsVisible = lJNIEnv.GetMethodID(classWindowInsets, "isVisible", "(I)Z");
-	bool visible_status = lJNIEnv.CallBooleanMethod(objectWindowInsets, methodIsVisible, statusBars);
+    jmethodID methodIsVisible = lJNIEnv.GetMethodID(classWindowInsets, "isVisible", "(I)Z");
+    bool visible_status = lJNIEnv.CallBooleanMethod(objectWindowInsets, methodIsVisible, statusBars);
 
     int validInsets = navigationBars;
     if (visible_status)
@@ -315,7 +315,7 @@ void getScreenSizeInPixelsAPI30(ANativeActivity& activity, int& width, int& heig
     else
         validInsets |= displayCutout;
 
-	jmethodID methodGetInsets = lJNIEnv.GetMethodID(classWindowInsets, "getInsets", "(I)Landroid/graphics/Insets;");
+    jmethodID methodGetInsets = lJNIEnv.GetMethodID(classWindowInsets, "getInsets", "(I)Landroid/graphics/Insets;");
     jobject objectInsets = lJNIEnv.CallObjectMethod(objectWindowInsets, methodGetInsets, navigationBars | statusBars | displayCutout);
 
     jclass classInsets = lJNIEnv.FindClass("android/graphics/Insets");
