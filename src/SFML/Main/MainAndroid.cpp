@@ -491,7 +491,7 @@ void onNativeWindowResized(ANativeActivity* activity, ANativeWindow* /* window *
         states.screenSize.y = ANativeWindow_getHeight(states.window);
         // Send an event to warn people about the window move/resize
         const sf::Event::Resized event{
-            states.screenSize};
+            sf::Vector2u(states.screenSize)};
         states.forwardEvent(event);
     }
 }
@@ -548,7 +548,7 @@ void onContentRectChanged(ANativeActivity* activity, const ARect* /* rect */)
         states.screenSize.y = ANativeWindow_getHeight(states.window);
         // Send an event to warn people about the window move/resize
         const sf::Event::Resized event{
-            states.screenSize};
+            sf::Vector2u(states.screenSize)};
         states.forwardEvent(event);
     }
 }
