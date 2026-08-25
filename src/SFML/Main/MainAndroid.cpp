@@ -123,11 +123,7 @@ sf::priv::ActivityStates& retrieveStates(ANativeActivity& activity)
 
 
 void ActualConsoleOutText(std::string out_string) {
-	#ifdef ANDROID_COMPILATION
 	__android_log_print(ANDROID_LOG_INFO, "cc3dsfs", "%s", out_string.c_str());
-	#else
-	std::cout << out_string << std::endl;
-	#endif
 }
 
 ////////////////////////////////////////////////////////////
@@ -226,7 +222,6 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 		lJNIEnv.ExceptionClear();
 	}
     ActualConsoleOutText("SystemBars " + std::to_string(systemBars));
-    sf::err() << "SystemBars " << std::to_string(systemBars) << std::endl;
 }
 
 ////////////////////////////////////////////////////////////
