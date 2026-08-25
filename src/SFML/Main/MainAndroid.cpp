@@ -183,6 +183,26 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 		ActualConsoleOutText("SystemBars " + std::to_string(systemBars));
 		ActualConsoleOutText("StatusBars " + std::to_string(statusBars));
 	}
+
+	jmethodID methodGetAttributes = lJNIEnv.GetMethodID(classWindow, "getAttributes", "()Landroid/view/WindowManager$LayoutParams;");
+
+	jobject attrs = lJNIEnv.CallObjectMethod(objectWindow, methodGetAttributes);
+
+	if (attrs) {
+		jclass paramsClass = lJNIEnv.GetObjectClass(attrs);
+
+        jfieldID   fieldSystemUiFlagLowProfile = lJNIEnv.GetStaticFieldID(paramsClass, "LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS", "I");
+        const int systemUiFlagLowProfile      = lJNIEnv.GetStaticIntField(paramsClass, fieldSystemUiFlagLowProfile);
+
+		jfieldID cutoutModeField = lJNIEnv.GetFieldID(paramsClass, "layoutInDisplayCutoutMode", "I");
+
+		lJNIEnv.SetIntField(attrs, cutoutModeField, systemUiFlagLowProfile);
+
+		jmethodID setAttributes = lJNIEnv.GetMethodID(classWindow, "setAttributes", "(Landroid/view/WindowManager$LayoutParams;)V");
+
+		lJNIEnv.CallVoidMethod(objectWindow, setAttributes,	attrs);
+		ActualConsoleOutText("systemUiFlagLowProfile " + std::to_string(systemUiFlagLowProfile));
+	}
 }
 
 ////////////////////////////////////////////////////////////
