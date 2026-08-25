@@ -168,19 +168,21 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 
 	jmethodID methodGetRootWindowInsets = lJNIEnv.GetMethodID(classView, "getRootWindowInsets", "()Landroid/view/WindowInsets;");
 
-	jobject objectInsets =
-		lJNIEnv.CallObjectMethod(
-		    objectDecorView,
-		    methodGetRootWindowInsets
-		);
+	jobject objectInsets = lJNIEnv.CallObjectMethod(objectDecorView, methodGetRootWindowInsets);
 
     jclass classInsets = lJNIEnv.FindClass("android/view/WindowInsets");
 	jmethodID methodIsVisible = lJNIEnv.GetMethodID(classInsets, "isVisible", "(I)Z");
 
-	bool visible_system = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, systemBars);
-	bool visible_status = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, statusBars);
-    ActualConsoleOutText("SystemBars " + std::to_string(systemBars) + " " + std::to_string(visible_system));
-    ActualConsoleOutText("StatusBars " + std::to_string(statusBars) + " " + std::to_string(visible_status));
+    if(objectInsets) {
+		bool visible_system = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, systemBars);
+		bool visible_status = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, statusBars);
+		ActualConsoleOutText("SystemBars " + std::to_string(systemBars) + " " + std::to_string(visible_system));
+		ActualConsoleOutText("StatusBars " + std::to_string(statusBars) + " " + std::to_string(visible_status));
+    }
+    else {
+		ActualConsoleOutText("SystemBars " + std::to_string(systemBars));
+		ActualConsoleOutText("StatusBars " + std::to_string(statusBars));
+	}
 }
 
 ////////////////////////////////////////////////////////////
