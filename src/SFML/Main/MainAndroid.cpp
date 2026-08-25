@@ -133,95 +133,54 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
     ActualConsoleOutText("TEST");
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
 
 
     jclass classInsetsType = lJNIEnv.FindClass("android/view/WindowInsets$Type");
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
 
     jmethodID methodSystemBars = lJNIEnv.GetStaticMethodID(classInsetsType, "systemBars", "()I");
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
+
+    jmethodID methodStatusBars = lJNIEnv.GetStaticMethodID(classInsetsType, "statusBars", "()I");
 
     int systemBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodSystemBars);
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
+
+    int statusBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodStatusBars);
 
     jobject objectActivity = activity.clazz;
     jclass  classActivity  = lJNIEnv.GetObjectClass(objectActivity);
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
 
     jmethodID methodGetWindow = lJNIEnv.GetMethodID(classActivity, "getWindow", "()Landroid/view/Window;");
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
     jobject   objectWindow    = lJNIEnv.CallObjectMethod(objectActivity, methodGetWindow);
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
 
     jclass    classWindow        = lJNIEnv.FindClass("android/view/Window");
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
     jmethodID methodGetInsetsController = lJNIEnv.GetMethodID(classWindow, "getInsetsController", "()Landroid/view/WindowInsetsController;");
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
     jobject   objectController    = lJNIEnv.CallObjectMethod(objectWindow, methodGetInsetsController);
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
 
     jclass classInsetsController = lJNIEnv.FindClass("android/view/WindowInsetsController");
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
 
     jmethodID methodHide = lJNIEnv.GetMethodID(classInsetsController, "hide", "(I)V");
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
 
     lJNIEnv.CallVoidMethod(objectController, methodHide, systemBars);
-    if (lJNIEnv.ExceptionCheck())
-	{
-		lJNIEnv.ExceptionDescribe();
-		lJNIEnv.ExceptionClear();
-	}
-    ActualConsoleOutText("SystemBars " + std::to_string(systemBars));
+
+    jmethodID methodGetDecorView = lJNIEnv.GetMethodID(classWindow, "getDecorView", "()Landroid/view/View;");
+    jobject   objectDecorView    = lJNIEnv.CallObjectMethod(objectWindow, methodGetDecorView);
+
+    jclass classView = lJNIEnv.FindClass("android/view/View");
+
+	jmethodID methodGetRootWindowInsets = lJNIEnv.GetMethodID(classView, "getRootWindowInsets", "()Landroid/view/WindowInsets;");
+
+	jobject objectInsets =
+		lJNIEnv.CallObjectMethod(
+		    objectDecorView,
+		    methodGetRootWindowInsets
+		);
+
+    jclass classInsets = lJNIEnv.FindClass("android/view/WindowInsets");
+	jmethodID methodIsVisible = lJNIEnv.GetMethodID(classInsets, "isVisible", "(I)Z");
+
+	bool visible_system = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, systemBars);
+	bool visible_status = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, statusBars);
+    ActualConsoleOutText("SystemBars " + std::to_string(systemBars) + " " + std::to_string(visible_system));
+    ActualConsoleOutText("StatusBars " + std::to_string(statusBars) + " " + std::to_string(visible_status));
 }
 
 ////////////////////////////////////////////////////////////
