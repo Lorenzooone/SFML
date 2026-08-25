@@ -41,6 +41,7 @@
 #include <SFML/System/Sleep.hpp>
 #include <SFML/System/Time.hpp>
 
+#include <android/log.h>
 #include <android/native_activity.h>
 #include <android/window.h>
 
@@ -120,11 +121,20 @@ sf::priv::ActivityStates& retrieveStates(ANativeActivity& activity)
     return *static_cast<sf::priv::ActivityStates*>(activity.instance);
 }
 
+
+void ActualConsoleOutText(std::string out_string) {
+	#ifdef ANDROID_COMPILATION
+	__android_log_print(ANDROID_LOG_INFO, "cc3dsfs", "%s", out_string.c_str());
+	#else
+	std::cout << out_string << std::endl;
+	#endif
+}
+
 ////////////////////////////////////////////////////////////
 void goToFullscreenModeAPI30(ANativeActivity& activity)
 {
     JNIEnv& lJNIEnv = *activity.env;
-    sf::err() << "TEST" << std::endl;
+    ActualConsoleOutText("TEST");
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
     if (lJNIEnv.ExceptionCheck())
@@ -215,6 +225,7 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 		lJNIEnv.ExceptionDescribe();
 		lJNIEnv.ExceptionClear();
 	}
+    ActualConsoleOutText("SystemBars " + std::to_string(systemBars));
     sf::err() << "SystemBars " << std::to_string(systemBars) << std::endl;
 }
 
@@ -224,6 +235,7 @@ void goToFullscreenMode(ANativeActivity& activity)
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
 
+    ActualConsoleOutText("apiLevel " + std::to_string(apiLevel));
     if (apiLevel >= 30) {
         goToFullscreenModeAPI30(activity);
         return;
