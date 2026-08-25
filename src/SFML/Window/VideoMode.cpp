@@ -58,7 +58,7 @@ const std::vector<VideoMode>& VideoMode::getFullscreenModes()
         // screen orientation... While after the first boot this can be tracked using
         // the Resized event, for the first boot that is not possible!
         // Technically the ideal thing on Android would be to always just return one,
-        // that changes depending on the orientation of the screen...
+        // that changes depending on the orientation of the screen and other factors...
         #ifndef SFML_SYSTEM_ANDROID
         std::sort(result.begin(), result.end(), std::greater<>());
         #endif
