@@ -130,7 +130,6 @@ void ActualConsoleOutText(std::string out_string) {
 void goToFullscreenModeAPI30(ANativeActivity& activity)
 {
     JNIEnv& lJNIEnv = *activity.env;
-    ActualConsoleOutText("TEST");
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
 
@@ -139,11 +138,11 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 
     jmethodID methodSystemBars = lJNIEnv.GetStaticMethodID(classInsetsType, "systemBars", "()I");
 
-    jmethodID methodStatusBars = lJNIEnv.GetStaticMethodID(classInsetsType, "statusBars", "()I");
+    //jmethodID methodStatusBars = lJNIEnv.GetStaticMethodID(classInsetsType, "statusBars", "()I");
 
     int systemBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodSystemBars);
 
-    int statusBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodStatusBars);
+    //int statusBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodStatusBars);
 
     jobject objectActivity = activity.clazz;
     jclass  classActivity  = lJNIEnv.GetObjectClass(objectActivity);
@@ -160,29 +159,6 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
     jmethodID methodHide = lJNIEnv.GetMethodID(classInsetsController, "hide", "(I)V");
 
     lJNIEnv.CallVoidMethod(objectController, methodHide, systemBars);
-
-    jmethodID methodGetDecorView = lJNIEnv.GetMethodID(classWindow, "getDecorView", "()Landroid/view/View;");
-    jobject   objectDecorView    = lJNIEnv.CallObjectMethod(objectWindow, methodGetDecorView);
-
-    jclass classView = lJNIEnv.FindClass("android/view/View");
-
-	jmethodID methodGetRootWindowInsets = lJNIEnv.GetMethodID(classView, "getRootWindowInsets", "()Landroid/view/WindowInsets;");
-
-	jobject objectInsets = lJNIEnv.CallObjectMethod(objectDecorView, methodGetRootWindowInsets);
-
-    jclass classInsets = lJNIEnv.FindClass("android/view/WindowInsets");
-	jmethodID methodIsVisible = lJNIEnv.GetMethodID(classInsets, "isVisible", "(I)Z");
-
-    if(objectInsets) {
-		bool visible_system = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, systemBars);
-		bool visible_status = lJNIEnv.CallBooleanMethod(objectInsets, methodIsVisible, statusBars);
-		ActualConsoleOutText("SystemBars " + std::to_string(systemBars) + " " + std::to_string(visible_system));
-		ActualConsoleOutText("StatusBars " + std::to_string(statusBars) + " " + std::to_string(visible_status));
-    }
-    else {
-		ActualConsoleOutText("SystemBars " + std::to_string(systemBars));
-		ActualConsoleOutText("StatusBars " + std::to_string(statusBars));
-	}
 
 	jmethodID methodGetAttributes = lJNIEnv.GetMethodID(classWindow, "getAttributes", "()Landroid/view/WindowManager$LayoutParams;");
 
@@ -211,7 +187,6 @@ void goToFullscreenMode(ANativeActivity& activity)
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
 
-    ActualConsoleOutText("apiLevel " + std::to_string(apiLevel));
     if (apiLevel >= 30) {
         goToFullscreenModeAPI30(activity);
         return;
@@ -269,9 +244,104 @@ void goToFullscreenMode(ANativeActivity& activity)
     lJNIEnv.CallVoidMethod(objectDecorView, methodsetSystemUiVisibility, flags);
 }
 
+void getScreenSizeInPixelsAPI30(ANativeActivity& activity, int& width, int& height, bool ignore_insets)
+{
+	// From Android developers documentation, perform the following Java code:
+	//
+	//final WindowMetrics metrics = windowManager.getCurrentWindowMetrics();
+	//final Rect bounds = metrics.getBounds();
+
+    JNIEnv& lJNIEnv = *activity.env;
+
+    jobject objectActivity = activity.clazz;
+    jclass  classActivity  = lJNIEnv.GetObjectClass(objectActivity);
+    jmethodID methodGetWindowManager = lJNIEnv.GetMethodID(classActivity,
+                                                           "getWindowManager",
+                                                           "()Landroid/view/WindowManager;");
+    jobject   objectWindowManager    = lJNIEnv.CallObjectMethod(objectActivity, methodGetWindowManager);
+
+    jclass    classWindowManager      = lJNIEnv.FindClass("android/view/WindowManager");
+
+    jmethodID methodGetCurrentWindowMetrics = lJNIEnv.GetMethodID(classWindowManager, "getCurrentWindowMetrics", "()Landroid/view/WindowMetrics;");
+
+    jobject objectWindowMetrics = lJNIEnv.CallObjectMethod(objectWindowManager, methodGetCurrentWindowMetrics);
+
+    jclass    classWindowMetrics      = lJNIEnv.FindClass("android/view/WindowMetrics");
+
+	jmethodID methodGetBounds = lJNIEnv.GetMethodID(classWindowMetrics, "getBounds", "()Landroid/graphics/Rect;");
+
+    jobject objectRect = lJNIEnv.CallObjectMethod(objectWindowMetrics, methodGetBounds);
+
+    jclass    classRect                 = lJNIEnv.FindClass("android/graphics/Rect");
+	jmethodID methodWidth = lJNIEnv.GetMethodID(classRect, "width", "()I");
+	jmethodID methodHeight = lJNIEnv.GetMethodID(classRect, "height", "()I");
+
+    width = lJNIEnv.CallIntMethod(objectRect, methodWidth);
+    height = lJNIEnv.CallIntMethod(objectRect, methodHeight);
+
+    if (ignore_insets)
+        return;
+
+	// From Android developers documentation, perform the following Java code:
+	//
+	//final WindowInsets windowInsets = metrics.getWindowInsets();
+	//Insets insets = windowInsets.getInsets(WindowInsets.Type.navigationBars() | WindowInsets.Type.displayCutout()); // Edited
+	//
+	//int insetsWidth = insets.right + insets.left;
+	//int insetsHeight = insets.top + insets.bottom;
+	//
+    //final Size legacySize = new Size(bounds.width() - insetsWidth, bounds.height() - insetsHeight);
+
+	jmethodID methodGetWindowInsets = lJNIEnv.GetMethodID(classWindowMetrics, "getWindowInsets", "()Landroid/view/WindowInsets;");
+	jobject objectWindowInsets = lJNIEnv.CallObjectMethod(objectWindowMetrics, methodGetWindowInsets);
+
+    jclass classInsetsType = lJNIEnv.FindClass("android/view/WindowInsets$Type");
+
+    jmethodID methodStatusBars = lJNIEnv.GetStaticMethodID(classInsetsType, "statusBars", "()I");
+    jmethodID methodNavigationBars = lJNIEnv.GetStaticMethodID(classInsetsType, "navigationBars", "()I");
+    jmethodID methodDisplayCutout = lJNIEnv.GetStaticMethodID(classInsetsType, "displayCutout", "()I");
+
+    int statusBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodStatusBars);
+    int navigationBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodNavigationBars);
+    int displayCutout = lJNIEnv.CallStaticIntMethod(classInsetsType, methodDisplayCutout);
+
+    jclass classWindowInsets = lJNIEnv.FindClass("android/view/WindowInsets");
+	jmethodID methodIsVisible = lJNIEnv.GetMethodID(classWindowInsets, "isVisible", "(I)Z");
+	bool visible_status = lJNIEnv.CallBooleanMethod(objectWindowInsets, methodIsVisible, statusBars);
+
+    int validInsets = navigationBars;
+    if (visible_status)
+        validInsets |= statusBars;
+    else
+        validInsets |= displayCutout;
+
+	jmethodID methodGetInsets = lJNIEnv.GetMethodID(classWindowInsets, "getInsets", "(I)Landroid/graphics/Insets;");
+    jobject objectInsets = lJNIEnv.CallObjectMethod(objectWindowInsets, methodGetInsets, navigationBars | statusBars | displayCutout);
+
+    jclass classInsets = lJNIEnv.FindClass("android/graphics/Insets");
+    jfieldID fieldRight  = lJNIEnv.GetFieldID(classInsets, "right", "I");
+    jfieldID fieldLeft = lJNIEnv.GetFieldID(classInsets, "left", "I");
+    jfieldID fieldTop  = lJNIEnv.GetFieldID(classInsets, "top", "I");
+    jfieldID fieldBottom = lJNIEnv.GetFieldID(classInsets, "bottom", "I");
+
+    int insetsWidth = lJNIEnv.GetIntField(objectInsets, fieldRight) + lJNIEnv.GetIntField(objectInsets, fieldLeft);
+    int insetsHeight = lJNIEnv.GetIntField(objectInsets, fieldTop) + lJNIEnv.GetIntField(objectInsets, fieldBottom);
+
+    width -= insetsWidth;
+    height -= insetsHeight;
+}
+
 ////////////////////////////////////////////////////////////
 void getScreenSizeInPixels(ANativeActivity& activity, int& width, int& height)
 {
+    // Get the current Android API level.
+    const int apiLevel = getAndroidApiLevel(activity);
+
+    if (apiLevel >= 30) {
+        getScreenSizeInPixelsAPI30(activity, width, height, false);
+        return;
+    }
+
     // Perform the following Java code:
     //
     // DisplayMetrics dm = new DisplayMetrics();
@@ -311,6 +381,14 @@ void getScreenSizeInPixels(ANativeActivity& activity, int& width, int& height)
 ////////////////////////////////////////////////////////////
 void getFullScreenSizeInPixels(ANativeActivity& activity, int& width, int& height)
 {
+    // Get the current Android API level.
+    const int apiLevel = getAndroidApiLevel(activity);
+
+    if (apiLevel >= 30) {
+        getScreenSizeInPixelsAPI30(activity, width, height, true);
+        return;
+    }
+
     // Perform the following Java code:
     //
     // DisplayMetrics dm = new DisplayMetrics();
@@ -486,12 +564,10 @@ void onNativeWindowResized(ANativeActivity* activity, ANativeWindow* /* window *
     // Make sure the window still exists before we access the dimensions on it
     if (states.window != nullptr)
     {
-        // Update getDesktopMode accordingly...
-        states.screenSize.x = ANativeWindow_getWidth(states.window);
-        states.screenSize.y = ANativeWindow_getHeight(states.window);
+        getScreenSizeInPixels(*activity, states.screenSize.x, states.screenSize.y);
         // Send an event to warn people about the window move/resize
         const sf::Event::Resized event{
-            sf::Vector2u(states.screenSize)};
+            sf::Vector2u(sf::Vector2(ANativeWindow_getWidth(states.window), ANativeWindow_getHeight(states.window)))};
         states.forwardEvent(event);
     }
 }
@@ -543,12 +619,10 @@ void onContentRectChanged(ANativeActivity* activity, const ARect* /* rect */)
     // Make sure the window still exists before we access the dimensions on it
     if (states.window != nullptr)
     {
-        // Update getDesktopMode accordingly...
-        states.screenSize.x = ANativeWindow_getWidth(states.window);
-        states.screenSize.y = ANativeWindow_getHeight(states.window);
+        getScreenSizeInPixels(*activity, states.screenSize.x, states.screenSize.y);
         // Send an event to warn people about the window move/resize
         const sf::Event::Resized event{
-            sf::Vector2u(states.screenSize)};
+            sf::Vector2u(sf::Vector2(ANativeWindow_getWidth(states.window), ANativeWindow_getHeight(states.window)))};
         states.forwardEvent(event);
     }
 }
