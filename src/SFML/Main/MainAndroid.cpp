@@ -121,11 +121,46 @@ sf::priv::ActivityStates& retrieveStates(ANativeActivity& activity)
 }
 
 ////////////////////////////////////////////////////////////
+void goToFullscreenModeAPI30(ANativeActivity& activity)
+{
+    // Get the current Android API level.
+    const int apiLevel = getAndroidApiLevel(activity);
+
+    JNIEnv& lJNIEnv = *activity.env;
+
+    jclass classInsetsType = lJNIEnv.FindClass("android/view/WindowInsets$Type");
+
+    jmethodID methodSystemBars = lJNIEnv.GetStaticMethodID(classInsetsType, "systemBars", "()I");
+
+    int systemBars = lJNIEnv.CallStaticIntMethod(classInsetsType, methodSystemBars);
+
+    jobject objectActivity = activity.clazz;
+    jclass  classActivity  = lJNIEnv.GetObjectClass(objectActivity);
+
+    jmethodID methodGetWindow = lJNIEnv.GetMethodID(classActivity, "getWindow", "()Landroid/view/Window;");
+    jobject   objectWindow    = lJNIEnv.CallObjectMethod(objectActivity, methodGetWindow);
+
+    jclass    classWindow        = lJNIEnv.FindClass("android/view/Window");
+    jmethodID methodGetInsetsController = lJNIEnv.GetMethodID(classWindow, "getInsetsController", "()Landroid/view/WindowInsetsController;");
+    jobject   objectController    = lJNIEnv.CallObjectMethod(objectWindow, methodGetInsetsController);
+
+    jclass classInsetsController = lJNIEnv.FindClass("android/view/WindowInsetsController");
+
+    jmethodID methodHide = lJNIEnv.GetMethodID(classInsetsController, "hide", "(I)V");
+
+    lJNIEnv.CallVoidMethod(objectController, methodHide, systemBars);
+}
+
+////////////////////////////////////////////////////////////
 void goToFullscreenMode(ANativeActivity& activity)
 {
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
 
+    if (apiLevel >= 30) {
+        goToFullscreenModeAPI30(activity);
+        return;
+    }
     // Hide the status bar
     ANativeActivity_setWindowFlags(&activity, AWINDOW_FLAG_FULLSCREEN, AWINDOW_FLAG_FULLSCREEN);
 
