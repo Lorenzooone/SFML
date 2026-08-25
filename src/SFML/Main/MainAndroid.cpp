@@ -123,7 +123,8 @@ sf::priv::ActivityStates& retrieveStates(ANativeActivity& activity)
 ////////////////////////////////////////////////////////////
 void goToFullscreenModeAPI30(ANativeActivity& activity)
 {
-    err() << "TEST" << std::endl;
+    JNIEnv& lJNIEnv = *activity.env;
+    sf::err() << "TEST" << std::endl;
     // Get the current Android API level.
     const int apiLevel = getAndroidApiLevel(activity);
     if (lJNIEnv.ExceptionCheck())
@@ -132,7 +133,6 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 		lJNIEnv.ExceptionClear();
 	}
 
-    JNIEnv& lJNIEnv = *activity.env;
 
     jclass classInsetsType = lJNIEnv.FindClass("android/view/WindowInsets$Type");
     if (lJNIEnv.ExceptionCheck())
@@ -215,7 +215,7 @@ void goToFullscreenModeAPI30(ANativeActivity& activity)
 		lJNIEnv.ExceptionDescribe();
 		lJNIEnv.ExceptionClear();
 	}
-    err() << "SystemBars " << std::to_string(systemBars) << std::endl;
+    sf::err() << "SystemBars " << std::to_string(systemBars) << std::endl;
 }
 
 ////////////////////////////////////////////////////////////
