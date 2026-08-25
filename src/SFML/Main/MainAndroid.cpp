@@ -270,46 +270,6 @@ void goToFullscreenMode(ANativeActivity& activity)
 }
 
 ////////////////////////////////////////////////////////////
-void getScreenSizeInPixels(ANativeActivity& activity, int& width, int& height)
-{
-    // Perform the following Java code:
-    //
-    // DisplayMetrics dm = new DisplayMetrics();
-    // getWindowManager().getDefaultDisplay().getMetrics(dm);
-
-    JNIEnv& lJNIEnv = *activity.env;
-
-    jobject objectActivity = activity.clazz;
-    jclass  classActivity  = lJNIEnv.GetObjectClass(objectActivity);
-
-    jclass    classDisplayMetrics  = lJNIEnv.FindClass("android/util/DisplayMetrics");
-    jmethodID initDisplayMetrics   = lJNIEnv.GetMethodID(classDisplayMetrics, "<init>", "()V");
-    jobject   objectDisplayMetrics = lJNIEnv.NewObject(classDisplayMetrics, initDisplayMetrics);
-
-    jmethodID methodGetWindowManager = lJNIEnv.GetMethodID(classActivity,
-                                                           "getWindowManager",
-                                                           "()Landroid/view/WindowManager;");
-    jobject   objectWindowManager    = lJNIEnv.CallObjectMethod(objectActivity, methodGetWindowManager);
-
-    jclass    classWindowManager      = lJNIEnv.FindClass("android/view/WindowManager");
-    jmethodID methodGetDefaultDisplay = lJNIEnv.GetMethodID(classWindowManager,
-                                                            "getDefaultDisplay",
-                                                            "()Landroid/view/Display;");
-    jobject   objectDisplay           = lJNIEnv.CallObjectMethod(objectWindowManager, methodGetDefaultDisplay);
-
-    jclass    classDisplay     = lJNIEnv.FindClass("android/view/Display");
-    jmethodID methodGetMetrics = lJNIEnv.GetMethodID(classDisplay, "getMetrics", "(Landroid/util/DisplayMetrics;)V");
-    lJNIEnv.CallVoidMethod(objectDisplay, methodGetMetrics, objectDisplayMetrics);
-
-    jfieldID fieldWidthPixels  = lJNIEnv.GetFieldID(classDisplayMetrics, "widthPixels", "I");
-    jfieldID fieldHeightPixels = lJNIEnv.GetFieldID(classDisplayMetrics, "heightPixels", "I");
-
-    width  = lJNIEnv.GetIntField(objectDisplayMetrics, fieldWidthPixels);
-    height = lJNIEnv.GetIntField(objectDisplayMetrics, fieldHeightPixels);
-}
-
-
-////////////////////////////////////////////////////////////
 void getFullScreenSizeInPixels(ANativeActivity& activity, int& width, int& height)
 {
     // Perform the following Java code:
@@ -437,8 +397,6 @@ void onNativeWindowCreated(ANativeActivity* activity, ANativeWindow* window)
     {
         if (states.fullscreen)
             goToFullscreenMode(*activity);
-        // Update getDesktopMode accordingly...
-        getScreenSizeInPixels(*activity, states.screenSize.x, states.screenSize.y);
         states.forwardEvent(sf::Event::FocusGained{});
     }
 
@@ -480,8 +438,23 @@ void onNativeWindowRedrawNeeded(ANativeActivity* /* activity */, ANativeWindow* 
 }
 
 ////////////////////////////////////////////////////////////
-void onNativeWindowResized(ANativeActivity* /* activity */, ANativeWindow* /* window */)
+void onNativeWindowResized(ANativeActivity* activity, ANativeWindow* /* window */)
 {
+    // Retrieve our activity states from the activity instance
+    sf::priv::ActivityStates& states = retrieveStates(*activity);
+    const std::lock_guard     lock(states.mutex);
+
+    // Make sure the window still exists before we access the dimensions on it
+    if (states.window != nullptr)
+    {
+        // Update getDesktopMode accordingly...
+        states.screenSize.x = ANativeWindow_getWidth(states.window);
+        states.screenSize.y = ANativeWindow_getHeight(states.window);
+        // Send an event to warn people about the window move/resize
+        const sf::Event::Resized event{
+            states.screenSize};
+        states.forwardEvent(event);
+    }
 }
 
 ////////////////////////////////////////////////////////////
@@ -532,10 +505,11 @@ void onContentRectChanged(ANativeActivity* activity, const ARect* /* rect */)
     if (states.window != nullptr)
     {
         // Update getDesktopMode accordingly...
-        getScreenSizeInPixels(*activity, states.screenSize.x, states.screenSize.y);
+        states.screenSize.x = ANativeWindow_getWidth(states.window);
+        states.screenSize.y = ANativeWindow_getHeight(states.window);
         // Send an event to warn people about the window move/resize
         const sf::Event::Resized event{
-            sf::Vector2u(sf::Vector2(ANativeWindow_getWidth(states.window), ANativeWindow_getHeight(states.window)))};
+            states.screenSize};
         states.forwardEvent(event);
     }
 }
