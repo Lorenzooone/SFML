@@ -454,6 +454,8 @@ void onNativeWindowCreated(ANativeActivity* activity, ANativeWindow* window)
     // to recreate the surface again
     if (states.context)
     {
+        if (states.fullscreen)
+            goToFullscreenMode(*activity);
         // Update getDesktopMode accordingly...
         getScreenSizeInPixels(*activity, states.screenSize.x, states.screenSize.y);
         states.forwardEvent(sf::Event::FocusGained{});
